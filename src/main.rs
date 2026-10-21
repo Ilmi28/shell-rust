@@ -2,6 +2,11 @@
 use std::io::{self, Write};
 
 fn main() {
-    print!("$ ");
-    io::stdout().flush().unwrap();
+    loop {
+        print!("$ ");
+        let mut command = String::new();
+        io::stdin().read_line(&mut command).unwrap();
+        println!("{command}: command not found");  
+        io::stdout().flush().unwrap();
+    }
 }
