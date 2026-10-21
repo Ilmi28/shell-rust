@@ -1,16 +1,11 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+mod console;
 
 fn main() {
     loop {
-        print!("$ ");
-        io::stdout().flush().unwrap();
-
-        let mut command = String::new();
-        io::stdin().read_line(&mut command).unwrap();
-        let command = command.trim();
-
-        println!("{command}: command not found");  
-        io::stdout().flush().unwrap();
+        console::write("$ ");
+        let command = console::read_line();
+        console::write_line(&format!("{command}: command not found"));
     }
 }
