@@ -3,7 +3,7 @@ use std::io::{self, Write};
 
 fn main() {
     loop {
-        print!("$ ");
+        println!("$ ");
         let mut command = String::new();
         io::stdin().read_line(&mut command).unwrap();
         println!("{command}: command not found");  
