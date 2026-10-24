@@ -1,4 +1,4 @@
-use std::io::{self, Stdin, Stdout, Write};
+use std::io::{self, Write};
 
 pub fn read_line() -> String {
     let mut line = String::new();
