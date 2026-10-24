@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 mod exit;
+mod echo;
 
 pub trait Command {
     fn execute(&self, args: &[&str]);
@@ -14,6 +15,7 @@ impl CommandRegistry {
         let mut commands: HashMap<&'static str, Box<dyn Command>> = HashMap::new();
 
         commands.insert("exit", Box::new(exit::ExitCommand));
+        commands.insert("echo", Box::new(echo::EchoCommand));  
 
         Self { commands }
     }
