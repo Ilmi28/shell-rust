@@ -1,7 +1,6 @@
 use std::{env, path::Path};
-use is_executable::IsExecutable;
 
-use crate::{commands::ShellContext, console};
+use crate::{commands::ShellContext, console, file};
 
 use super::Command;
 
@@ -19,7 +18,7 @@ impl Command for TypeCommand {
         for path in paths {
             let full_path = &format!("{path}/{cmd}");
             let path = Path::new(full_path);
-            if path.exists() && path.is_executable() {
+            if path.exists() && file::is_executable(full_path) {
                 console::write_line(&format!("{cmd} is {full_path}"));
                 return;
             }
