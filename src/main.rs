@@ -1,8 +1,15 @@
+use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use codecrafters_shell::{CommandRegistry, console, file};
+use codecrafters_shell::{CommandRegistry, console, consts, file};
 
 fn main() {
+    if let Ok(current_dir) = env::current_dir() {
+        unsafe {
+            env::set_var(consts::ENV_CURR_PATH, &current_dir)
+        }
+    }
+
     let command_registry = CommandRegistry::new();
     loop {
         console::write("$ ");

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 mod exit;
 mod echo;
+mod pwd;
 mod r#type;
 
 pub struct ShellContext<'a> {
@@ -21,7 +22,8 @@ impl CommandRegistry {
 
         commands.insert("exit", Box::new(exit::ExitCommand));
         commands.insert("echo", Box::new(echo::EchoCommand));
-        commands.insert("type", Box::new(r#type::TypeCommand));  
+        commands.insert("type", Box::new(r#type::TypeCommand));
+        commands.insert("pwd",Box::new(pwd::PwdCommand));  
 
         Self { commands }
     }

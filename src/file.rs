@@ -1,9 +1,9 @@
-use std::path::Path;
+use std::{env, path::Path};
 use std::process::Command;
-use std::{env, fs};
+use std::fs;
 use std::os::unix::fs::PermissionsExt;
 
-use crate::{console, file};
+use crate::{console, consts, file};
 
 pub fn is_executable(path: &str) -> bool {
     let metadata = fs::metadata(path).unwrap();
@@ -14,7 +14,7 @@ pub fn is_executable(path: &str) -> bool {
 }
 
 pub fn get_command_path(command_name: &str) -> Option<String> {
-    let path_env = env::var("PATH").unwrap();
+    let path_env = env::var(consts::ENV_PATH).unwrap();
     let paths: Vec<&str> = path_env.split([':', ';']).collect();
     for path in paths {
         let full_path = &format!("{path}/{command_name}");
