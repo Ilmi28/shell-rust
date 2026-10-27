@@ -3,7 +3,8 @@ use std::process::Command;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 
-use crate::{console, consts, file};
+use crate::consts;
+use crate::utils::{console, file};
 
 pub fn is_executable(path: &str) -> bool {
     let metadata = fs::metadata(path).unwrap();

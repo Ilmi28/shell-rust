@@ -1,15 +1,8 @@
-use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use codecrafters_shell::{CommandRegistry, console, consts, file};
+use codecrafters_shell::{CommandRegistry, utils::{console, file}};
 
 fn main() {
-    if let Ok(current_dir) = env::current_dir() {
-        unsafe {
-            env::set_var(consts::ENV_CURR_PATH, &current_dir)
-        }
-    }
-
     let command_registry = CommandRegistry::new();
     loop {
         console::write("$ ");
@@ -21,15 +14,17 @@ fn main() {
         };
         let args: Vec<&str> = parts.collect();
 
+
+        let result = command_registry.run(&command_name, &args);
+        if result {
+            continue;
+        }
+
         if let Some(_) = file::get_command_path(command_name) {
             file::execute_command(command_name, &args);
             continue;
         }
 
-
-        let result = command_registry.run(&command_name, &args);
-        if !result {
-            console::write_line(&format!("{command_name}: command not found"));
-        }
+        console::write_line(&format!("{command_name}: command not found"));
     }
 }

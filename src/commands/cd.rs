@@ -1,0 +1,26 @@
+
+use std::env;
+
+use super::Command;
+
+pub struct CdCommand;
+
+impl Command for CdCommand {
+    fn execute(&self, args: &[&str], _ctx: &super::ShellContext) {
+        let path_parts: Vec<&str> = args[0].split('/').collect();
+        let curr_path = env::current_dir().unwrap();
+        let mut output_path_parts: Vec<&str> = curr_path.to_str().unwrap().split('/').collect();
+
+        for part in path_parts {
+            match part {
+                "." | "" => {}
+                ".." => {
+                    output_path_parts.pop();
+                }
+                _ => output_path_parts.push(part)
+            }
+        }
+        let output_path = output_path_parts.join("/");
+        env::set_current_dir(&output_path).unwrap();
+    }
+}

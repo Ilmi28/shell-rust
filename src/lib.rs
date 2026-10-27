@@ -1,6 +1,5 @@
 pub mod commands;
-pub mod console;
-pub mod file;
+pub mod utils;
 pub mod consts;
 
 pub use commands::CommandRegistry;

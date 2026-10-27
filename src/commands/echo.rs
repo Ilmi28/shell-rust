@@ -1,4 +1,4 @@
-use crate::{commands::ShellContext, console};
+use crate::{commands::ShellContext, utils::console};
 use super::Command;
 
 pub struct EchoCommand;

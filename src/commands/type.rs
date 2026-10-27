@@ -1,4 +1,4 @@
-use crate::{commands::ShellContext, console, file};
+use crate::{commands::ShellContext, utils::{console, file}};
 
 use super::Command;
 
