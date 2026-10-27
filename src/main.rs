@@ -14,8 +14,8 @@ fn main() {
         };
         let args: Vec<&str> = parts.collect();
 
-        if let Some(path) = file::get_command_path(command_name) {
-            file::execute_command(&path, &args);
+        if let Some(_) = file::get_command_path(command_name) {
+            file::execute_command(command_name, &args);
             continue;
         }
 

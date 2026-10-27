@@ -26,8 +26,8 @@ pub fn get_command_path(command_name: &str) -> Option<String> {
     None
 }
 
-pub fn execute_command(command_path: &str, args: &[&str]) {
-    let mut command = Command::new(command_path);
+pub fn execute_command(command: &str, args: &[&str]) {
+    let mut command = Command::new(command);
     if let Ok(output) = command.args(args).output() {
         console::write(&String::from_utf8_lossy(&output.stdout));
     }
