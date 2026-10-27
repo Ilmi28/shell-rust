@@ -1,5 +1,3 @@
-use std::{env, path::Path};
-
 use crate::{commands::ShellContext, console, file};
 
 use super::Command;
@@ -13,15 +11,10 @@ impl Command for TypeCommand {
             console::write_line(&format!("{cmd} is a shell builtin"));
             return;
         }
-        let path_env = env::var("PATH").unwrap();
-        let paths: Vec<&str> = path_env.split([':', ';']).collect();
-        for path in paths {
-            let full_path = &format!("{path}/{cmd}");
-            let path = Path::new(full_path);
-            if path.exists() && file::is_executable(full_path) {
-                console::write_line(&format!("{cmd} is {full_path}"));
-                return;
-            }
+
+        if let Some(path) = file::get_command_path(cmd) {
+            console::write_line(&format!("{cmd} is {path}"));
+            return;
         }
 
         console::write_line(&format!("{cmd}: not found"));
