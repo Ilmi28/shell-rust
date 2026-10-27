@@ -3,7 +3,7 @@ use std::process::Command;
 use std::{env, fs};
 use std::os::unix::fs::PermissionsExt;
 
-use crate::file;
+use crate::{console, file};
 
 pub fn is_executable(path: &str) -> bool {
     let metadata = fs::metadata(path).unwrap();
@@ -27,7 +27,8 @@ pub fn get_command_path(command_name: &str) -> Option<String> {
 }
 
 pub fn execute_command(command_path: &str, args: &[&str]) {
-    let _ = Command::new(command_path)
-        .args(args)
-        .output();
+    let mut command = Command::new(command_path);
+    if let Ok(output) = command.args(args).output() {
+        console::write(&String::from_utf8_lossy(&output.stdout));
+    }
 }
