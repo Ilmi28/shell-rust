@@ -10,7 +10,7 @@ pub struct ShellContext<'a> {
 }
 
 pub trait Command {
-    fn execute(&self, args: &[&str], ctx: &ShellContext);
+    fn execute(&self, args: &Vec<String>, ctx: &ShellContext);
 }
 
 pub struct CommandRegistry {
@@ -30,7 +30,7 @@ impl CommandRegistry {
         Self { commands }
     }
 
-    pub fn run(&self, name: &str, args: &[&str]) -> bool {
+    pub fn run(&self, name: &str, args: &Vec<String>) -> bool {
         match self.commands.get(name) {
             Some(cmd) => {
                 let ctx = ShellContext {

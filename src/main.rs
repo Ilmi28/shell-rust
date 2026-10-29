@@ -1,30 +1,25 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use codecrafters_shell::{CommandRegistry, utils::{console, file}};
+use codecrafters_shell::{CommandRegistry, utils::{console, file, parser}};
 
 fn main() {
     let command_registry = CommandRegistry::new();
     loop {
         console::write("$ ");
         let input = console::read_line();
-        let mut parts = input.trim().split_whitespace();
-        let command_name = match parts.next() {
-            Some(name) => name,
-            None => continue
-        };
-        let args: Vec<&str> = parts.collect();
+        let (command, args) = parser::parse_command(&input);
 
 
-        let result = command_registry.run(&command_name, &args);
+        let result = command_registry.run(&command, &args);
         if result {
             continue;
         }
 
-        if let Some(_) = file::get_command_path(command_name) {
-            file::execute_command(command_name, &args);
+        if let Some(_) = file::get_command_path(&command) {
+            file::execute_command(&command, &args);
             continue;
         }
 
-        console::write_line(&format!("{command_name}: command not found"));
+        console::write_line(&format!("{command}: command not found"));
     }
 }

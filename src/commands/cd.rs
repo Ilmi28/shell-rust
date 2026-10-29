@@ -8,8 +8,8 @@ use super::Command;
 pub struct CdCommand;
 
 impl Command for CdCommand {
-    fn execute(&self, args: &[&str], _ctx: &super::ShellContext) {
-        let input_path = args[0];
+    fn execute(&self, args: &Vec<String>, _ctx: &super::ShellContext) {
+        let input_path = &args[0];
         if input_path == "~" {
             let home_dir = env::var(consts::ENV_HOME).unwrap();
             handle_set_dir(&home_dir, &input_path);
