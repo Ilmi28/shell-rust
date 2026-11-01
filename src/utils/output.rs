@@ -6,6 +6,12 @@ pub fn read_line() -> io::Result<String> {
     return Ok(line.trim().to_string());
 }
 
+pub fn write(message: &str) -> io::Result<()> {
+    print!("{}", message);
+    io::stdout().flush()?;
+    Ok(())
+}
+
 pub fn write_stdout(message: &str, target: Option<&str>) -> io::Result<()> {
     match target {
         Some(path) => {
