@@ -10,7 +10,7 @@ pub struct ShellContext<'a> {
 }
 
 pub trait Command {
-    fn execute(&self, args: &Vec<String>, ctx: &ShellContext, std_out: Option<&str>) -> io::Result<()>;
+    fn execute(&self, args: &Vec<String>, ctx: &ShellContext, stdout: Option<&str>, stderr: Option<&str>) -> io::Result<()>;
 }
 
 pub struct CommandRegistry {
@@ -30,13 +30,13 @@ impl CommandRegistry {
         Self { commands }
     }
 
-    pub fn run(&self, name: &str, args: &Vec<String>, stdout: Option<&str>) -> io::Result<bool> {
+    pub fn run(&self, name: &str, args: &Vec<String>, stdout: Option<&str>, stderr: Option<&str>) -> io::Result<bool> {
         match self.commands.get(name) {
             Some(cmd) => {
                 let ctx = ShellContext {
                     is_builtin: &|target| self.commands.contains_key(target)
                 };
-                cmd.execute(args, &ctx, stdout)?;
+                cmd.execute(args, &ctx, stdout, stderr)?;
                 return Ok(true);
             }
             None => {

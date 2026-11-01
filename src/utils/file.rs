@@ -27,7 +27,7 @@ pub fn get_command_path(command_name: &str) -> Option<String> {
     None
 }
 
-pub fn execute_command(command: &str, args: &Vec<String>, stdout: Option<&str>) -> io::Result<()> {
+pub fn execute_command(command: &str, args: &Vec<String>, stdout: Option<&str>, stderr: Option<&str>) -> io::Result<()> {
     let mut ext_command = Command::new(command);
     let result = ext_command.args(args).output();
     match result {
@@ -37,7 +37,7 @@ pub fn execute_command(command: &str, args: &Vec<String>, stdout: Option<&str>) 
             }
 
             if !output.stderr.is_empty() {
-                output::write_stderr(&String::from_utf8_lossy(&output.stderr), None)?
+                output::write_stderr(&String::from_utf8_lossy(&output.stderr), stderr)?
             }
         }
         Err(_) => { }

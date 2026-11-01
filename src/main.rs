@@ -9,17 +9,17 @@ fn main() -> io::Result<()> {
         let input = output::read_line()?;
         let (command, mut args) = parser::parse_command(&input);
         let stdout = parser::extract_stdout(&mut args); 
-
-        let result = command_registry.run(&command, &args, stdout.as_deref())?;
+        let stderr = parser::extract_stderr(&mut args);
+        let result = command_registry.run(&command, &args, stdout.as_deref(), stderr.as_deref())?;
         if result {
             continue;
         }
 
         if let Some(_) = file::get_command_path(&command) {
-            file::execute_command(&command, &args, stdout.as_deref())?;
+            file::execute_command(&command, &args, stdout.as_deref(), stderr.as_deref())?;
             continue;
         }
 
-        output::write_stderr(&format!("{command}: command not found\n"), None)?;
+        output::write_stderr(&format!("{command}: command not found\n"), stderr.as_deref())?;
     }
 }
