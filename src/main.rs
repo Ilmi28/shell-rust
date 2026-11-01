@@ -20,6 +20,6 @@ fn main() -> io::Result<()> {
             continue;
         }
 
-        output::write_stderr(&format!("{command}: command not found"), None)?;
+        output::write_stderr(&format!("{command}: command not found\n"), None)?;
     }
 }
