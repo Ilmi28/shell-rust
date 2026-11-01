@@ -10,7 +10,7 @@ fn main() -> io::Result<()> {
         let (command, mut args) = parser::parse_command(&input);
         let stdout = parser::extract_stdout(&mut args); 
         let stderr = parser::extract_stderr(&mut args);
-        let result = command_registry.run(&command, &args, stdout.as_deref(), stderr.as_deref())?;
+         let result = command_registry.run(&command, &args, stdout.as_deref(), stderr.as_deref())?;
         if result {
             continue;
         }

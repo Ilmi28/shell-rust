@@ -1,4 +1,4 @@
-use std::{fs::{File}, io::{self, Write}};
+use std::{fs::{self, File}, io::{self, Write}, path::Path};
 
 pub fn read_line() -> io::Result<String> {
     let mut line = String::new();
@@ -9,6 +9,8 @@ pub fn read_line() -> io::Result<String> {
 pub fn write_stdout(message: &str, target: Option<&str>) -> io::Result<()> {
     match target {
         Some(path) => {
+            let path = Path::new(path);
+            fs::create_dir_all(path)?;
             let mut file = File::create(path)?;
             file.write_all(message.as_bytes())?;
         },
@@ -23,6 +25,8 @@ pub fn write_stdout(message: &str, target: Option<&str>) -> io::Result<()> {
 pub fn write_stderr(message: &str, target: Option<&str>) -> io::Result<()> {
     match target {
         Some(path) => {
+            let path = Path::new(path);
+            fs::create_dir_all(path)?;
             let mut file = File::create(path)?;
             file.write_all(message.as_bytes())?;
         },
