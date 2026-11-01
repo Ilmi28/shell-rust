@@ -8,9 +8,9 @@ pub struct PwdCommand;
 
 impl Command for PwdCommand {
     fn execute(&self, _args: &Vec<String>, _ctx: &super::ShellContext, stdout: Option<&str>) -> io::Result<()> {
-        if let Ok(value) = env::current_dir() {
-            output::write_stdout(&value.to_str().unwrap(), stdout)?;
-        }
+        let current_dir = env::current_dir()?;
+        let current_dir_str = current_dir.to_str().unwrap();
+        output::write_stdout(&format!("{current_dir_str}\n"), stdout)?;
         Ok(())
     }
 }
