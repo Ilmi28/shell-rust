@@ -42,8 +42,5 @@ pub fn execute_command(command: &str, args: &Vec<String>, stdout: Option<&str>) 
         }
         Err(_) => { }
     }
-    if let Ok(output) = command.args(args).output() {
-        output::write_stdout(&String::from_utf8_lossy(&output.stdout), stdout)?;
-    }
     Ok(())
 }
