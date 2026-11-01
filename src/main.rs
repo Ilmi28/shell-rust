@@ -1,6 +1,5 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::{fs::{self, File}, path::Path};
 use codecrafters_shell::{CommandRegistry, utils::{output, file, parser}};
 
 fn main() -> io::Result<()> {
