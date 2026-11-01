@@ -27,7 +27,7 @@ pub fn write_stderr(message: &str, target: Option<&str>) -> io::Result<()> {
         Some(path) => {
             let path = Path::new(path);
             fs::create_dir_all(path.parent().unwrap())?;
-            let mut file = File::create(path.file_name().unwrap())?;
+            let mut file = File::create(path)?;
             file.write_all(message.as_bytes())?;
         },
         None => {
