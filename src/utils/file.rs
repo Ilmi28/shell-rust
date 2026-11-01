@@ -28,8 +28,8 @@ pub fn get_command_path(command_name: &str) -> Option<String> {
 }
 
 pub fn execute_command(command: &str, args: &Vec<String>, stdout: Option<&str>) -> io::Result<()> {
-    let mut command = Command::new(command);
-    let result = command.args(args).output();
+    let mut ext_command = Command::new(command);
+    let result = ext_command.args(args).output();
     match result {
         Ok(output) => {
             if !output.stdout.is_empty() {
@@ -37,7 +37,7 @@ pub fn execute_command(command: &str, args: &Vec<String>, stdout: Option<&str>) 
             }
 
             if !output.stderr.is_empty() {
-                output::write_stdout(&String::from_utf8_lossy(&output.stderr), stdout)?
+                output::write_stderr(&String::from_utf8_lossy(&output.stderr), None)?
             }
         }
         Err(_) => { }
