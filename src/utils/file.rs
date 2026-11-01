@@ -29,6 +29,19 @@ pub fn get_command_path(command_name: &str) -> Option<String> {
 
 pub fn execute_command(command: &str, args: &Vec<String>, stdout: Option<&str>) -> io::Result<()> {
     let mut command = Command::new(command);
+    let result = command.args(args).output();
+    match result {
+        Ok(output) => {
+            if !output.stdout.is_empty() {
+                output::write_stdout(&String::from_utf8_lossy(&output.stdout), stdout)?
+            }
+
+            if !output.stderr.is_empty() {
+                output::write_stdout(&String::from_utf8_lossy(&output.stderr), stdout)?
+            }
+        }
+        Err(_) => { }
+    }
     if let Ok(output) = command.args(args).output() {
         output::write_stdout(&String::from_utf8_lossy(&output.stdout), stdout)?;
     }
