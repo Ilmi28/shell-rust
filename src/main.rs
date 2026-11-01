@@ -5,7 +5,7 @@ use codecrafters_shell::{CommandRegistry, utils::{output, file, parser}};
 fn main() -> io::Result<()> {
     let command_registry = CommandRegistry::new();
     loop {
-        output::write("$ ")?;
+        output::write_stdout("$ ", None)?;
         let input = output::read_line()?;
         let (command, mut args) = parser::parse_command(&input);
         let stdout = parser::extract_stdout(&mut args); 
