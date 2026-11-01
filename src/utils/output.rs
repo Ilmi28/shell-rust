@@ -27,7 +27,7 @@ pub fn write_stderr(message: &str, target: Option<&str>) -> io::Result<()> {
             file.write_all(message.as_bytes())?;
         },
         None => {
-            eprintln!("{}", message);
+            eprint!("{}", message);
             io::stderr().flush()?;
         }
     }
