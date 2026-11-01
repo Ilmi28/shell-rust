@@ -1,3 +1,4 @@
+use std::fs::File;
 use std::{env, path::Path};
 use std::process::Command;
 use std::{fs, io};
@@ -40,7 +41,16 @@ pub fn execute_command(command: &str, args: &Vec<String>, stdout: Option<&str>, 
                 output::write_stderr(&String::from_utf8_lossy(&output.stderr), stderr)?
             }
         }
-        Err(_) => { }
+        Err(_) => {
+            output::write_stderr(&format!("{}: command not found\n", command), None)?;
+        }
     }
     Ok(())
+}
+
+pub fn create_file(path: &str) -> io::Result<File> {
+    let path = Path::new(path);
+    fs::create_dir_all(path.parent().unwrap())?;
+    let file = File::create(path)?;
+    return Ok(file)
 }

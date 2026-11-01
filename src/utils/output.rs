@@ -1,5 +1,7 @@
 use std::{fs::{self, File}, io::{self, Write}, path::Path};
 
+use crate::utils::file;
+
 pub fn read_line() -> io::Result<String> {
     let mut line = String::new();
     io::stdin().read_line(&mut line)?;
@@ -9,9 +11,7 @@ pub fn read_line() -> io::Result<String> {
 pub fn write_stdout(message: &str, target: Option<&str>) -> io::Result<()> {
     match target {
         Some(path) => {
-            let path = Path::new(path);
-            fs::create_dir_all(path.parent().unwrap())?;
-            let mut file = File::create(path)?;
+            let mut file = file::create_file(path)?;
             file.write_all(message.as_bytes())?;
         },
         None => {
@@ -25,9 +25,7 @@ pub fn write_stdout(message: &str, target: Option<&str>) -> io::Result<()> {
 pub fn write_stderr(message: &str, target: Option<&str>) -> io::Result<()> {
     match target {
         Some(path) => {
-            let path = Path::new(path);
-            fs::create_dir_all(path.parent().unwrap())?;
-            let mut file = File::create(path)?;
+            let mut file = file::create_file(path)?;
             file.write_all(message.as_bytes())?;
         },
         None => {

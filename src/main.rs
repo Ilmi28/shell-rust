@@ -11,15 +11,11 @@ fn main() -> io::Result<()> {
         let (command, mut args) = parser::parse_command(&input);
         let stdout = parser::extract_stdout(&mut args);
         if let Some(path) = &stdout {
-            let path = Path::new(path);
-            fs::create_dir_all(path.parent().unwrap())?;
-            File::create(path)?;
+            file::create_file(path)?;
         } 
         let stderr = parser::extract_stderr(&mut args);
         if let Some(path) = &stderr {
-            let path = Path::new(path);
-            fs::create_dir_all(path.parent().unwrap())?;
-            File::create(path)?;
+            file::create_file(path)?;
         }
         let result = command_registry.run(&command, &args, stdout.as_deref(), stderr.as_deref())?;
         if result {
