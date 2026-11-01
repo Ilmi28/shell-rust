@@ -10,8 +10,8 @@ pub fn write_stdout(message: &str, target: Option<&str>) -> io::Result<()> {
     match target {
         Some(path) => {
             let path = Path::new(path);
-            fs::create_dir_all(path)?;
-            let mut file = File::create(path)?;
+            fs::create_dir_all(path.parent().unwrap())?;
+            let mut file = File::create(path.file_name().unwrap())?;
             file.write_all(message.as_bytes())?;
         },
         None => {
@@ -26,8 +26,8 @@ pub fn write_stderr(message: &str, target: Option<&str>) -> io::Result<()> {
     match target {
         Some(path) => {
             let path = Path::new(path);
-            fs::create_dir_all(path)?;
-            let mut file = File::create(path)?;
+            fs::create_dir_all(path.parent().unwrap())?;
+            let mut file = File::create(path.file_name().unwrap())?;
             file.write_all(message.as_bytes())?;
         },
         None => {
