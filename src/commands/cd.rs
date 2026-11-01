@@ -10,7 +10,7 @@ pub struct CdCommand;
 impl Command for CdCommand {
     fn execute(&self, args: &Vec<String>, _ctx: &super::ShellContext, stdout: Option<&str>) -> io::Result<()> {
         if args.is_empty() {
-            output::write_stdout("Error: cd requires passing an argument\n", stdout)?;
+            output::write_stdout("Error: cd requires passing an argument", stdout)?;
             return Ok(());
         }
         let input_path = &args[0];

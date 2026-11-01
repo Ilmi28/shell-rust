@@ -13,7 +13,7 @@ pub fn write_stdout(message: &str, target: Option<&str>) -> io::Result<()> {
             file.write_all(message.as_bytes())?;
         },
         None => {
-            print!("{}", message);
+            println!("{}", message);
             io::stdout().flush()?;
         }
     }
@@ -27,7 +27,7 @@ pub fn write_stderr(message: &str, target: Option<&str>) -> io::Result<()> {
             file.write_all(message.as_bytes())?;
         },
         None => {
-            eprint!("{}", message);
+            eprintln!("{}", message);
             io::stderr().flush()?;
         }
     }
