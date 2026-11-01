@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, io};
 mod exit;
 mod echo;
 mod pwd;
@@ -10,7 +10,7 @@ pub struct ShellContext<'a> {
 }
 
 pub trait Command {
-    fn execute(&self, args: &Vec<String>, ctx: &ShellContext);
+    fn execute(&self, args: &Vec<String>, ctx: &ShellContext, std_out: Option<&str>) -> io::Result<()>;
 }
 
 pub struct CommandRegistry {
@@ -30,17 +30,17 @@ impl CommandRegistry {
         Self { commands }
     }
 
-    pub fn run(&self, name: &str, args: &Vec<String>) -> bool {
+    pub fn run(&self, name: &str, args: &Vec<String>, stdout: Option<&str>) -> io::Result<bool> {
         match self.commands.get(name) {
             Some(cmd) => {
                 let ctx = ShellContext {
                     is_builtin: &|target| self.commands.contains_key(target)
                 };
-                cmd.execute(args, &ctx);
-                return true;
+                cmd.execute(args, &ctx, stdout)?;
+                return Ok(true);
             }
             None => {
-                return false;
+                return Ok(false);
             }
         }
     }

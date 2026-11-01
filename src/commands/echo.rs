@@ -1,11 +1,14 @@
-use crate::{commands::ShellContext, utils::console};
+use std::io;
+
+use crate::{commands::ShellContext, utils::output};
 use super::Command;
 
 pub struct EchoCommand;
 
 impl Command for EchoCommand {
-    fn execute(&self, args: &Vec<String>, _ctx: &ShellContext) {
+    fn execute(&self, args: &Vec<String>, _ctx: &ShellContext, stdout: Option<&str>) -> io::Result<()> {
         let message = args.join(" ");
-        console::write_line(&message);
+        output::write_stdout(&message, stdout)?;
+        Ok(())
     }
 }

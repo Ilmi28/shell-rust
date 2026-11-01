@@ -47,3 +47,18 @@ pub fn parse_command(input: &str) -> (String, Vec<String>) {
     let command = parsed_parts.remove(0);
     return (command, parsed_parts);
 }
+
+pub fn extract_stdout(args: &mut Vec<String>) -> Option<String> {
+    if args.is_empty() {
+        return None;
+    }
+
+    for i in 0..args.len()-1 {
+        if args[i] == ">" || args[i] == "1>" {
+            args.remove(i);
+            let target = args.remove(i);
+            return Some(target);
+        }
+    }
+    None
+}

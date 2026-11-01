@@ -1,22 +1,25 @@
-use crate::{commands::ShellContext, utils::{console, file}};
+use std::io;
+
+use crate::{commands::ShellContext, utils::{output, file}};
 
 use super::Command;
 
 pub struct TypeCommand;
 
 impl Command for TypeCommand {
-    fn execute(&self, args: &Vec<String>, ctx: &ShellContext) {
+    fn execute(&self, args: &Vec<String>, ctx: &ShellContext, stdout: Option<&str>) -> io::Result<()> {
         let cmd = &args[0];
         if (ctx.is_builtin)(&cmd) {
-            console::write_line(&format!("{cmd} is a shell builtin"));
-            return;
+            output::write_stdout(&format!("{cmd} is a shell builtin\n"), stdout)?;
+            return Ok(());
         }
 
         if let Some(path) = file::get_command_path(&cmd) {
-            console::write_line(&format!("{cmd} is {path}"));
-            return;
+            output::write_stdout(&format!("{cmd} is {path}"), stdout)?;
+            return Ok(());
         }
 
-        console::write_line(&format!("{cmd}: not found"));
+        output::write_stdout(&format!("{cmd}: not found"), stdout)?;
+        Ok(())
     }
 }
