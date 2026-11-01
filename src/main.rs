@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::{fs::{self, File}, path::Path};
 use codecrafters_shell::{CommandRegistry, utils::{output, file, parser}};
 
 fn main() -> io::Result<()> {
@@ -8,9 +9,19 @@ fn main() -> io::Result<()> {
         output::write_stdout("$ ", None)?;
         let input = output::read_line()?;
         let (command, mut args) = parser::parse_command(&input);
-        let stdout = parser::extract_stdout(&mut args); 
+        let stdout = parser::extract_stdout(&mut args);
+        if let Some(path) = &stdout {
+            let path = Path::new(path);
+            fs::create_dir_all(path.parent().unwrap())?;
+            File::create(path)?;
+        } 
         let stderr = parser::extract_stderr(&mut args);
-         let result = command_registry.run(&command, &args, stdout.as_deref(), stderr.as_deref())?;
+        if let Some(path) = &stderr {
+            let path = Path::new(path);
+            fs::create_dir_all(path.parent().unwrap())?;
+            File::create(path)?;
+        }
+        let result = command_registry.run(&command, &args, stdout.as_deref(), stderr.as_deref())?;
         if result {
             continue;
         }
