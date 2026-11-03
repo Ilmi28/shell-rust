@@ -1,6 +1,6 @@
 use std::{env, io};
 
-use crate::{commands::OutputRedirect, utils::output};
+use crate::utils::output::{self, OutputRedirect};
 
 use super::Command;
 

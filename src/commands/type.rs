@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::{commands::{OutputRedirect, ShellContext}, utils::{file, output}};
+use crate::{commands::ShellContext, utils::{file, output::{self, OutputRedirect}}};
 
 use super::Command;
 

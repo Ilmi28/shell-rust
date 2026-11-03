@@ -1,14 +1,11 @@
 use std::{collections::HashMap, io};
+
+use crate::utils::output::OutputRedirect;
 mod exit;
 mod echo;
 mod pwd;
 mod cd;
 mod r#type;
-
-pub struct OutputRedirect {
-    pub stdout: Option<(String, bool)>,
-    pub stderr: Option<(String, bool)>
-}
 
 pub struct ShellContext<'a> {
     pub is_builtin: &'a dyn Fn(&str) -> bool

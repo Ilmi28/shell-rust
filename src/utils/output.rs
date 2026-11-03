@@ -1,6 +1,11 @@
 use std::{fs::OpenOptions, io::{self, Write}};
 
-use crate::{commands::OutputRedirect, utils::{file, parser}};
+use crate::{utils::{file, parser}};
+
+pub struct OutputRedirect {
+    pub stdout: Option<(String, bool)>,
+    pub stderr: Option<(String, bool)>
+}
 
 pub fn read_line() -> io::Result<String> {
     let mut line = String::new();

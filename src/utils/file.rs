@@ -4,7 +4,7 @@ use std::process::Command;
 use std::{fs, io};
 use std::os::unix::fs::PermissionsExt;
 
-use crate::commands::OutputRedirect;
+use crate::utils::output::OutputRedirect;
 use crate::consts;
 use crate::utils::{output, file};
 
