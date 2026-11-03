@@ -1,3 +1,7 @@
+use std::io;
+
+use crate::utils::{file, output::OutputRedirect, parser};
+
 
 const DOUBLE_QUOTE_ESCAPE_CHARS: [u8; 2] = [b'"', b'\\'];
 
@@ -48,7 +52,7 @@ pub fn parse_command(input: &str) -> (String, Vec<String>) {
     return (command, parsed_parts);
 }
 
-pub fn extract_stdout(args: &mut Vec<String>) -> Option<String> {
+fn extract_stdout(args: &mut Vec<String>) -> Option<String> {
     if args.is_empty() {
         return None;
     }
@@ -63,7 +67,7 @@ pub fn extract_stdout(args: &mut Vec<String>) -> Option<String> {
     None
 }
 
-pub fn extract_stderr(args: &mut Vec<String>) -> Option<String> {
+fn extract_stderr(args: &mut Vec<String>) -> Option<String> {
     if args.is_empty() {
         return None;
     }
@@ -78,7 +82,7 @@ pub fn extract_stderr(args: &mut Vec<String>) -> Option<String> {
     None
 }
 
-pub fn extract_stdout_append(args: &mut Vec<String>) -> Option<String> {
+fn extract_stdout_append(args: &mut Vec<String>) -> Option<String> {
     if args.is_empty() {
         return None;
     }
@@ -93,7 +97,7 @@ pub fn extract_stdout_append(args: &mut Vec<String>) -> Option<String> {
     None
 }
 
-pub fn extract_stderr_append(args: &mut Vec<String>) -> Option<String> {
+fn extract_stderr_append(args: &mut Vec<String>) -> Option<String> {
     if args.is_empty() {
         return None;
     }
@@ -106,4 +110,33 @@ pub fn extract_stderr_append(args: &mut Vec<String>) -> Option<String> {
         }
     }
     None
+}
+
+pub fn parse_output_redirect(args: &mut Vec<String>) -> io::Result<OutputRedirect> {
+    let mut output_redirect = OutputRedirect {
+        stdout: None,
+        stderr: None
+    };
+
+    let stdout = parser::extract_stdout(args);
+    if let Some(path) = &stdout {
+        file::create_file_if_not_exists(path)?;
+        output_redirect.stdout = Some((path.to_string(), true))
+    } 
+    let stderr = parser::extract_stderr(args);
+    if let Some(path) = &stderr {
+        file::create_file_if_not_exists(path)?;
+        output_redirect.stderr = Some((path.to_string(), true))
+    }
+    let stdout_append = parser::extract_stdout_append(args);
+    if let Some(path) = &stdout_append {
+        file::create_file_if_not_exists(path)?;
+        output_redirect.stdout = Some((path.to_string(), false))
+    }
+    let stderr_append = parser::extract_stderr_append(args);
+    if let Some(path) = &stderr_append {
+        file::create_file_if_not_exists(path)?;
+        output_redirect.stderr = Some((path.to_string(), false))
+    }
+    Ok(output_redirect)
 }

@@ -9,7 +9,7 @@ fn main() -> io::Result<()> {
         let input = output::read_line()?;
         let (command, mut args) = parser::parse_command(&input);
 
-        let output_redirect = output::get_output_redirect(&mut args)?;
+        let output_redirect = parser::parse_output_redirect(&mut args)?;
 
         let result = command_registry.run(&command, &args, &output_redirect)?;
         if result {

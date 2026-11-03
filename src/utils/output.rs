@@ -1,7 +1,5 @@
 use std::{fs::OpenOptions, io::{self, Write}};
 
-use crate::{utils::{file, parser}};
-
 pub struct OutputRedirect {
     pub stdout: Option<(String, bool)>,
     pub stderr: Option<(String, bool)>
@@ -37,35 +35,6 @@ pub fn write_stderr(message: &str, target: &Option<(String, bool)>) -> io::Resul
         }
     }
     Ok(())
-}
-
-pub fn get_output_redirect(args: &mut Vec<String>) -> io::Result<OutputRedirect> {
-    let mut output_redirect = OutputRedirect {
-        stdout: None,
-        stderr: None
-    };
-
-    let stdout = parser::extract_stdout(args);
-    if let Some(path) = &stdout {
-        file::create_file_if_not_exists(path)?;
-        output_redirect.stdout = Some((path.to_string(), true))
-    } 
-    let stderr = parser::extract_stderr(args);
-    if let Some(path) = &stderr {
-        file::create_file_if_not_exists(path)?;
-        output_redirect.stderr = Some((path.to_string(), true))
-    }
-    let stdout_append = parser::extract_stdout_append(args);
-    if let Some(path) = &stdout_append {
-        file::create_file_if_not_exists(path)?;
-        output_redirect.stdout = Some((path.to_string(), false))
-    }
-    let stderr_append = parser::extract_stderr_append(args);
-    if let Some(path) = &stderr_append {
-        file::create_file_if_not_exists(path)?;
-        output_redirect.stderr = Some((path.to_string(), false))
-    }
-    Ok(output_redirect)
 }
 
 fn write_file(message: &str, target: &(String, bool)) -> io::Result<()> {
