@@ -5,12 +5,17 @@ mod pwd;
 mod cd;
 mod r#type;
 
+pub struct OutputRedirect {
+    pub stdout: Option<(String, bool)>,
+    pub stderr: Option<(String, bool)>
+}
+
 pub struct ShellContext<'a> {
     pub is_builtin: &'a dyn Fn(&str) -> bool
 }
 
 pub trait Command {
-    fn execute(&self, args: &Vec<String>, ctx: &ShellContext, stdout: Option<&str>, stderr: Option<&str>) -> io::Result<()>;
+    fn execute(&self, args: &Vec<String>, ctx: &ShellContext, out: &OutputRedirect) -> io::Result<()>;
 }
 
 pub struct CommandRegistry {
@@ -30,13 +35,13 @@ impl CommandRegistry {
         Self { commands }
     }
 
-    pub fn run(&self, name: &str, args: &Vec<String>, stdout: Option<&str>, stderr: Option<&str>) -> io::Result<bool> {
+    pub fn run(&self, name: &str, args: &Vec<String>, out: &OutputRedirect) -> io::Result<bool> {
         match self.commands.get(name) {
             Some(cmd) => {
                 let ctx = ShellContext {
                     is_builtin: &|target| self.commands.contains_key(target)
                 };
-                cmd.execute(args, &ctx, stdout, stderr)?;
+                cmd.execute(args, &ctx, out)?;
                 return Ok(true);
             }
             None => {

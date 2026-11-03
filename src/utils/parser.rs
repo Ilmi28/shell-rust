@@ -77,3 +77,18 @@ pub fn extract_stderr(args: &mut Vec<String>) -> Option<String> {
     }
     None
 }
+
+pub fn extract_stdout_append(args: &mut Vec<String>) -> Option<String> {
+    if args.is_empty() {
+        return None;
+    }
+
+    for i in 0..args.len()-1 {
+        if args[i] == ">>" || args[i] == "1>>" {
+            args.remove(i);
+            let target = args.remove(i);
+            return Some(target);
+        }
+    }
+    None
+}
