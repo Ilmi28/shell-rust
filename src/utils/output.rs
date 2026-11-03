@@ -55,6 +55,11 @@ pub fn get_output_redirect(args: &mut Vec<String>) -> io::Result<OutputRedirect>
         file::create_file_if_not_exists(path)?;
         output_redirect.stdout = Some((path.to_string(), false))
     }
+    let stderr_append = parser::extract_stderr_append(args);
+    if let Some(path) = &stderr_append {
+        file::create_file_if_not_exists(path)?;
+        output_redirect.stderr = Some((path.to_string(), false))
+    }
     Ok(output_redirect)
 }
 
