@@ -16,7 +16,7 @@ pub trait Command {
 }
 
 pub struct CommandRegistry {
-    commands: HashMap<&'static str, Box<dyn Command>>
+    pub commands: HashMap<&'static str, Box<dyn Command>>
 }
 
 impl CommandRegistry {

@@ -1,12 +1,19 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use codecrafters_shell::{CommandRegistry, utils::{file, output, parser}};
+use codecrafters_shell::{CommandRegistry, termios, utils::{file, output::{self}, parser}};
 
 fn main() -> io::Result<()> {
     let command_registry = CommandRegistry::new();
+    let _terminal = termios::RawTerminal::enable_raw_mode();
     loop {
         output::write_stdout("$ ", &None)?;
-        let input = output::read_line()?;
+        let commands: Vec<&str> = command_registry.commands.keys().cloned().collect();
+        let input = output::read_input(&commands)?;
+        if input.is_empty() {
+            output::write_stdout("\n", &None)?;
+            continue;
+        }
+
         let (command, mut args) = parser::parse_command(&input);
 
         let output_redirect = parser::parse_output_redirect(&mut args)?;
