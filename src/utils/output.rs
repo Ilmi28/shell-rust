@@ -19,11 +19,13 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
         match chr[0] {
             NEW_LINE | ENTER => { break; }
             TAB => {
-                clear_line();
                 let autocomplete = autocomplete(&input, commands);
+                if autocomplete.is_empty() {
+                    continue;
+                }
                 print!("$ {autocomplete} ");
                 io::stdout().flush()?;
-                input = autocomplete;
+                input = String::from(format!("{autocomplete} "));
             }
             BACKSPACE => {
                 clear_line();
@@ -46,8 +48,12 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
 }
 
 fn autocomplete(input: &String, commands: &Vec<&str>) -> String {
+    if input.is_empty() {
+        return String::new();
+    }
     for command in commands {
         if command.starts_with(input) {
+            clear_line();
             return command.to_string();
         }
     }
