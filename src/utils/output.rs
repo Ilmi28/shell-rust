@@ -21,7 +21,7 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
             TAB => {
                 clear_line();
                 let autocomplete = autocomplete(&input, commands);
-                print!("$ {autocomplete}");
+                print!("$ {autocomplete} ");
                 io::stdout().flush()?;
                 input = autocomplete;
             }
