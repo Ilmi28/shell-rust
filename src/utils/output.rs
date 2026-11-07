@@ -22,6 +22,7 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
                 let autocomplete = autocomplete(&input, commands);
                 if autocomplete.is_empty() {
                     print!("\x07");
+                    io::stdout().flush()?;
                     continue;
                 }
                 print!("$ {autocomplete} ");
