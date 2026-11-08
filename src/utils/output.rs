@@ -39,9 +39,9 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
                 else if autocomplete.len() == 1 {
                     clear_line();
                     let command = autocomplete.first().unwrap();
+                    input = String::from(format!("{command} "));
                     print!("{PROMPT}{command} ");
                     io::stdout().flush()?;
-                    input = String::from(format!("{command} "));
                 } else {
                     handle_multiple_autocomplete(prev, chr[0], autocomplete, &input, &mut chr[0])?;
                 }

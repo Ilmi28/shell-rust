@@ -47,7 +47,7 @@ pub fn get_external_commands_autocomplete(input: &str) -> io::Result<Vec<String>
             let path_str = path.to_str().unwrap();
             let file_name = path.file_name().unwrap().to_str().unwrap();
             if file_name.starts_with(input) && is_executable(&path_str) {
-                commands.push(file_name.to_string());
+                commands.push(file_name.trim().to_string());
             }
         }
     }
