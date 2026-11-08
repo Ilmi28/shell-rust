@@ -23,7 +23,6 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
     let mut prev: u8 = 0;
     loop {
         let mut chr = [0u8; 1];
-        let mut clear_prev = false;
         io::stdin().read(&mut chr)?;
         match chr[0] {
             NEW_LINE | ENTER => { break; }
@@ -43,7 +42,7 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
                     io::stdout().flush()?;
                     input = String::from(format!("{command} "));
                 } else {
-                    handle_multiple_autocomplete(prev, chr[0], autocomplete, &input, &mut clear_prev)?;
+                    handle_multiple_autocomplete(prev, chr[0], autocomplete, &input, &mut chr[0])?;
                 }
             }
             BACKSPACE => {
@@ -58,12 +57,7 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
                 io::stdout().flush()?
             }
         }
-        if clear_prev {
-            prev = 0;
-        }
-        else {
-            prev = chr[0];
-        }
+        prev = chr[0];
     }
     if !input.is_empty() {
         print!("\n");
@@ -72,12 +66,12 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
     return Ok(input);
 }
 
-fn handle_multiple_autocomplete(prev: u8, curr: u8, autocomplete: Vec<String>, input: &String, clear_prev: &mut bool) -> io::Result<()> {
+fn handle_multiple_autocomplete(prev: u8, curr: u8, autocomplete: Vec<String>, input: &String, buff: &mut u8) -> io::Result<()> {
     if prev == TAB && curr == TAB {
         let suggestions = autocomplete.join("  ");
         print!("\n{suggestions}");
         print!("\n{PROMPT}{input}");
-        *clear_prev = true;
+        *buff = 0;
     }
     else {
         print!("{}", BELL);
