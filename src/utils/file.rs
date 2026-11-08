@@ -9,7 +9,10 @@ use crate::consts;
 use crate::utils::{output, file};
 
 pub fn is_executable(path: &str) -> bool {
-    let metadata = fs::metadata(path).unwrap();
+    let metadata = match fs::metadata(path) {
+        Ok(data) => data,
+        Err(_) => return false
+    };
     let permissions = metadata.permissions();
     let mode = permissions.mode();
 
@@ -29,21 +32,26 @@ pub fn get_command_path(command_name: &str) -> Option<String> {
     None
 }
 
-pub fn get_external_command_autocomplete(input: &str) -> io::Result<Option<String>> {
+pub fn get_external_commands_autocomplete(input: &str) -> io::Result<Vec<String>> {
+    let mut commands: Vec<String> = Vec::new();
     let path_env = env::var(consts::ENV_PATH).unwrap();
     let paths: Vec<&str> = path_env.split([':', ';']).collect();
     for path in paths {
         let command_paths = fs::read_dir(path)?;
-        for command_path in command_paths {
-            let file_name = command_path?.file_name();
-            let file_name_str = file_name.to_str().unwrap();
-            let full_path = format!("{path}/{file_name_str}");
-            if file_name_str.starts_with(input) && is_executable(&full_path) {
-                return Ok(Some(file_name_str.to_string()))
+        for command_path_result in command_paths {
+            let command_path = match command_path_result {
+                Ok(entry) => entry,
+                Err(_) => continue
+            };
+            let path = command_path.path();
+            let path_str = path.to_str().unwrap();
+            let file_name = path.file_name().unwrap().to_str().unwrap();
+            if file_name.starts_with(input) && is_executable(&path_str) {
+                commands.push(file_name.to_string());
             }
         }
     }
-    Ok(None)
+    Ok(commands)
 }
 
 pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect) -> io::Result<()> {

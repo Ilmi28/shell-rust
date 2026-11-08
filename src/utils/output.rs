@@ -20,21 +20,29 @@ pub struct OutputRedirect {
 
 pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
     let mut input = String::new();
+    let mut prev: u8 = 0;
     loop {
         let mut chr = [0u8; 1];
+        let mut clear_prev = false;
         io::stdin().read(&mut chr)?;
         match chr[0] {
             NEW_LINE | ENTER => { break; }
             TAB => {
-                let autocomplete = autocomplete(&input, commands)?;
+                let autocomplete = get_autocomplete(&input, commands)?;
                 if autocomplete.is_empty() {
                     print!("{}", BELL);
                     io::stdout().flush()?;
                     continue;
+                } 
+                else if autocomplete.len() == 1 {
+                    clear_line();
+                    let command = autocomplete.first().unwrap();
+                    print!("{PROMPT}{command} ");
+                    io::stdout().flush()?;
+                    input = String::from(format!("{command} "));
+                } else {
+                    handle_multiple_autocomplete(prev, chr[0], autocomplete, &input, &mut clear_prev)?;
                 }
-                print!("{PROMPT}{autocomplete} ");
-                io::stdout().flush()?;
-                input = String::from(format!("{autocomplete} "));
             }
             BACKSPACE => {
                 clear_line();
@@ -48,6 +56,12 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
                 io::stdout().flush()?
             }
         }
+        if clear_prev {
+            prev = 0;
+        }
+        else {
+            prev = chr[0];
+        }
     }
     if !input.is_empty() {
         print!("\n");
@@ -56,22 +70,32 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
     return Ok(input);
 }
 
-fn autocomplete(input: &String, commands: &Vec<&str>) -> io::Result<String> {
+fn handle_multiple_autocomplete(prev: u8, curr: u8, autocomplete: Vec<String>, input: &String, clear_prev: &mut bool) -> io::Result<()> {
+    if prev == TAB && curr == TAB {
+        let suggestions = autocomplete.join("  ");
+        print!("\n{suggestions}");
+        print!("\n{PROMPT}{input}");
+        *clear_prev = true;
+    }
+    else {
+        print!("{}", BELL);
+    }
+    io::stdout().flush()?;
+    Ok(())
+}
+
+fn get_autocomplete(input: &String, commands: &Vec<&str>) -> io::Result<Vec<String>> {
     if input.is_empty() {
-        return Ok(String::new());
+        return Ok(Vec::new());
     }
-    for command in commands {
-        if command.starts_with(input) {
-            clear_line();
-            return Ok(command.to_string());
-        }
-    }
-    let external_autocomplete = file::get_external_command_autocomplete(input)?;
-    if let Some(autocomplete) = external_autocomplete {
-        clear_line();
-        return Ok(autocomplete);
-    }
-    Ok(String::new())
+    let mut result: Vec<String> = commands
+                                        .iter()
+                                        .filter(|x| x.starts_with(input))
+                                        .map(|x| x.to_string()).collect();
+
+    let mut external_autocomplete = file::get_external_commands_autocomplete(input)?;
+    result.append(&mut external_autocomplete);
+    Ok(result)
 }
 
 fn clear_line() { print!("{}", CLEAR_LINE); }
