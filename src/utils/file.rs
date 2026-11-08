@@ -29,6 +29,23 @@ pub fn get_command_path(command_name: &str) -> Option<String> {
     None
 }
 
+pub fn get_external_command_autocomplete(input: &str) -> io::Result<Option<String>> {
+    let path_env = env::var(consts::ENV_PATH).unwrap();
+    let paths: Vec<&str> = path_env.split([':', ';']).collect();
+    for path in paths {
+        let command_paths = fs::read_dir(path)?;
+        for command_path in command_paths {
+            let file_name = command_path?.file_name();
+            let file_name_str = file_name.to_str().unwrap();
+            let full_path = format!("{path}/{file_name_str}");
+            if file_name_str.starts_with(input) && is_executable(&full_path) {
+                return Ok(Some(file_name_str.to_string()))
+            }
+        }
+    }
+    Ok(None)
+}
+
 pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect) -> io::Result<()> {
     let mut ext_command = Command::new(command);
     let result = ext_command.args(args).output();
