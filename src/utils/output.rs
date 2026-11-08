@@ -7,6 +7,7 @@ const NEW_LINE:     u8 = b'\n';
 const ENTER:        u8 = b'\r';
 const BACKSPACE:    u8 = 127;
 const TAB:          u8 = b'\t';
+const NUL:          u8 = b'\0';
 
 const CLEAR_LINE:   &str = "\x1b[2K\r";
 const BELL:         &str = "\x07";
@@ -20,7 +21,7 @@ pub struct OutputRedirect {
 
 pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
     let mut input = String::new();
-    let mut prev: u8 = 0;
+    let mut prev: u8 = NUL;
     loop {
         let mut chr = [0u8; 1];
         io::stdin().read(&mut chr)?;
@@ -71,7 +72,7 @@ fn handle_multiple_autocomplete(prev: u8, curr: u8, autocomplete: Vec<String>, i
         let suggestions = autocomplete.join("  ");
         print!("\n{suggestions}");
         print!("\n{PROMPT}{input}");
-        *buff = 0;
+        *buff = NUL;
     }
     else {
         print!("{}", BELL);
