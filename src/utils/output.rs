@@ -29,8 +29,8 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
             NEW_LINE | ENTER => { break; }
             TAB => {
                 let mut autocomplete = get_autocomplete(&input, commands)?;
-                autocomplete.dedup();
                 autocomplete.sort();
+                autocomplete.dedup();
                 if autocomplete.is_empty() {
                     print!("{}", BELL);
                     io::stdout().flush()?;
@@ -41,10 +41,12 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
                     let command = autocomplete.first().unwrap();
                     input = String::from(format!("{command} "));
                     print!("{PROMPT}{command} ");
-                    io::stdout().flush()?;
                 } else {
-                    handle_multiple_autocomplete(prev, chr[0], autocomplete, &input, &mut chr[0])?;
+                    print!("{}", BELL);
+                    handle_multiple_autocomplete(prev, &mut chr[0], autocomplete, &mut input)?;
+                    io::stdout().flush()?;
                 }
+                io::stdout().flush()?;
             }
             BACKSPACE => {
                 clear_line();
@@ -67,18 +69,41 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
     return Ok(input);
 }
 
-fn handle_multiple_autocomplete(prev: u8, curr: u8, autocomplete: Vec<String>, input: &String, buff: &mut u8) -> io::Result<()> {
-    if prev == TAB && curr == TAB {
+fn handle_multiple_autocomplete(prev: u8, curr: &mut u8, autocomplete: Vec<String>, input: &mut String) -> io::Result<()> {
+    if prev == TAB && *curr == TAB {
         let suggestions = autocomplete.join("  ");
         print!("\n{suggestions}");
         print!("\n{PROMPT}{input}");
-        *buff = NUL;
+        *curr = NUL;
     }
     else {
-        print!("{}", BELL);
+        clear_line();
+        let prefix = extract_common_prefix(&autocomplete)?;
+        *input = prefix;
+        print!("{PROMPT}{input}");
     }
-    io::stdout().flush()?;
     Ok(())
+}
+
+fn extract_common_prefix(arr: &Vec<String>) -> io::Result<String> {
+    if arr.is_empty() {
+        return Ok(String::new());
+    }
+
+    let mut prefix = String::new();
+    let first = &arr[0];
+
+    for (n, curr_chr) in first.chars().enumerate() {
+        for curr_el in arr {
+            match curr_el.chars().nth(n) {
+                Some(c) if c == curr_chr => {}
+                _ => return Ok(prefix),
+            }
+        }
+        prefix.push(curr_chr);
+    }
+
+    Ok(prefix)
 }
 
 fn get_autocomplete(input: &String, commands: &Vec<&str>) -> io::Result<Vec<String>> {
