@@ -1,6 +1,6 @@
 use std::io::{self, Read, Write};
 
-use crate::terminal::autocomplete;
+use crate::{CommandRegistry, terminal::autocomplete, utils::parser};
 
 const NEW_LINE:     u8 = b'\n';
 const ENTER:        u8 = b'\r';
@@ -13,7 +13,7 @@ const BELL:         &str = "\x07";
 
 pub const PROMPT: &str = "$ ";
 
-pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
+pub fn read_input(commands: &CommandRegistry) -> io::Result<String> {
     print!("{PROMPT}");
     io::stdout().flush()?;
     let mut input = String::new();
@@ -24,22 +24,19 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
         match chr[0] {
             NEW_LINE | ENTER => { break; }
             TAB => {
-                let mut autocomplete = autocomplete::get_autocomplete(&input, commands)?;
+                let (command, args) = parser::parse_command(&input);
+                let mut autocomplete = autocomplete::get_autocomplete(&command, &args, commands)?;
                 autocomplete.sort();
                 autocomplete.dedup();
                 if autocomplete.is_empty() {
                     print!("{}", BELL);
+                    io::stdout().flush()?;
                     continue;
                 } 
                 else if autocomplete.len() == 1 {
-                    clear_line();
-                    let command = autocomplete.first().unwrap();
-                    input = String::from(format!("{command} "));
-                    print!("{PROMPT}{command} ");
+                    handle_single_autocomplete(&command, &args, &mut input, autocomplete);
                 } else {
-                    print!("{}", BELL);
                     handle_multiple_autocomplete(prev, &mut chr[0], autocomplete, &mut input)?;
-                    io::stdout().flush()?;
                 }
                 io::stdout().flush()?;
             }
@@ -64,7 +61,29 @@ pub fn read_input(commands: &Vec<&str>) -> io::Result<String> {
     return Ok(input);
 }
 
+fn handle_single_autocomplete(command: &String, args: &Vec<String>, input: &mut String, autocomplete: Vec<String>) {
+    clear_line();
+    let suggestion = autocomplete.first().unwrap();
+
+    if args.is_empty() {
+        *input = String::from(format!("{suggestion} "));
+        print!("{PROMPT}{suggestion} ");
+    }
+    else {
+        let prev_args = &args[..args.len() - 1];
+        if prev_args.is_empty() {
+            *input = String::from(format!("{command} {suggestion} "));
+        }
+        else {
+            let prev_args = prev_args.join(" ");
+            *input = String::from(format!("{command} {prev_args} {suggestion} "));
+        }
+        print!("{PROMPT}{input}")
+    }
+}
+
 fn handle_multiple_autocomplete(prev: u8, curr: &mut u8, autocomplete: Vec<String>, input: &mut String) -> io::Result<()> {
+    print!("{}", BELL);
     if prev == TAB && *curr == TAB {
         let suggestions = autocomplete.join("  ");
         print!("\n{suggestions}");

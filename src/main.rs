@@ -6,8 +6,7 @@ fn main() -> io::Result<()> {
     let command_registry = CommandRegistry::new();
     let _terminal = termios::RawTerminal::enable_raw_mode();
     loop {
-        let commands: Vec<&str> = command_registry.commands.keys().cloned().collect();
-        let input = reader::read_input(&commands)?;
+        let input = reader::read_input(&command_registry)?;
         if input.is_empty() {
             redirect::write_stdout("\n", &None)?;
             continue;

@@ -32,6 +32,13 @@ impl CommandRegistry {
         Self { commands }
     }
 
+    pub fn get_commands(&self) -> Vec<String> {
+        self.commands
+            .keys()
+            .map(|&cmd| cmd.to_string())
+            .collect()
+    }
+
     pub fn run(&self, name: &str, args: &Vec<String>, out: &OutputRedirect) -> io::Result<bool> {
         match self.commands.get(name) {
             Some(cmd) => {

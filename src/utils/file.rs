@@ -84,3 +84,20 @@ pub fn create_file_if_not_exists(path: &str) -> io::Result<File> {
     let file = File::create(path)?;
     return Ok(file)
 }
+
+pub fn get_filenames_in_curr_folder() -> io::Result<Vec<String>> {
+    let command_paths = fs::read_dir(".")?;
+    let mut filenames: Vec<String> = Vec::new();
+    for command_path_result in command_paths {
+        let command_path = match command_path_result {
+            Ok(entry) => entry,
+            Err(_) => continue
+        };
+        let path = command_path.path();
+        let file_name = path.file_name().unwrap().to_str().unwrap();
+        if path.is_file() {
+            filenames.push(file_name.trim().to_string());
+        }
+    }
+    Ok(filenames)
+}
