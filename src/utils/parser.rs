@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::utils::{file, output::OutputRedirect, parser};
+use crate::utils::{file, redirect::OutputRedirect, parser};
 
 
 const DOUBLE_QUOTE_ESCAPE_CHARS: [u8; 2] = [b'"', b'\\'];

@@ -1,6 +1,6 @@
 use std::{collections::HashMap, io};
 
-use crate::utils::output::OutputRedirect;
+use crate::utils::redirect::OutputRedirect;
 mod exit;
 mod echo;
 mod pwd;

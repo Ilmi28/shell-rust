@@ -4,9 +4,9 @@ use std::process::Command;
 use std::{fs, io};
 use std::os::unix::fs::PermissionsExt;
 
-use crate::utils::output::OutputRedirect;
+use crate::utils::redirect::OutputRedirect;
 use crate::consts;
-use crate::utils::{output, file};
+use crate::utils::{redirect, file};
 
 pub fn is_executable(path: &str) -> bool {
     let metadata = match fs::metadata(path) {
@@ -60,15 +60,15 @@ pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &Outp
     match result {
         Ok(output) => {
             if !output.stdout.is_empty() {
-                output::write_stdout(&String::from_utf8_lossy(&output.stdout), &output_redirect.stdout)?
+                redirect::write_stdout(&String::from_utf8_lossy(&output.stdout), &output_redirect.stdout)?
             }
 
             if !output.stderr.is_empty() {
-                output::write_stderr(&String::from_utf8_lossy(&output.stderr), &output_redirect.stderr)?
+                redirect::write_stderr(&String::from_utf8_lossy(&output.stderr), &output_redirect.stderr)?
             }
         }
         Err(_) => {
-            output::write_stderr(&format!("{}: command not found\n", command), &None)?;
+            redirect::write_stderr(&format!("{}: command not found\n", command), &None)?;
         }
     }
     Ok(())

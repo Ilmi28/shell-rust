@@ -1,7 +1,7 @@
 
 use std::{env, io, path::Path};
 
-use crate::{commands::OutputRedirect, consts, utils::output};
+use crate::{commands::OutputRedirect, consts, utils::redirect};
 
 use super::Command;
 
@@ -10,7 +10,7 @@ pub struct CdCommand;
 impl Command for CdCommand {
     fn execute(&self, args: &Vec<String>, _ctx: &super::ShellContext, output_redirect: &OutputRedirect) -> io::Result<()> {
         if args.is_empty() {
-            output::write_stderr("Error: cd requires passing an argument", &output_redirect.stderr)?;
+            redirect::write_stderr("Error: cd requires passing an argument", &output_redirect.stderr)?;
             return Ok(());
         }
         let input_path = &args[0];
@@ -49,7 +49,7 @@ fn handle_set_dir(dir: &str, input: &str, stderr: &Option<(String, bool)>) -> io
     } 
     else 
     {
-        output::write_stderr(&format!("cd: {input}: No such file or directory\n"), &stderr)?;
+        redirect::write_stderr(&format!("cd: {input}: No such file or directory\n"), &stderr)?;
     }
     Ok(())
 }

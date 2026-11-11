@@ -1,16 +1,15 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use codecrafters_shell::{CommandRegistry, termios, utils::{file, output::{self}, parser}};
+use codecrafters_shell::{CommandRegistry, terminal::{reader, termios}, utils::{file, parser, redirect::{self}}};
 
 fn main() -> io::Result<()> {
     let command_registry = CommandRegistry::new();
     let _terminal = termios::RawTerminal::enable_raw_mode();
     loop {
-        output::write_stdout(output::PROMPT, &None)?;
         let commands: Vec<&str> = command_registry.commands.keys().cloned().collect();
-        let input = output::read_input(&commands)?;
+        let input = reader::read_input(&commands)?;
         if input.is_empty() {
-            output::write_stdout("\n", &None)?;
+            redirect::write_stdout("\n", &None)?;
             continue;
         }
 
@@ -28,6 +27,6 @@ fn main() -> io::Result<()> {
             continue;
         }
 
-        output::write_stderr(&format!("{command}: command not found\n"), &output_redirect.stderr)?;
+        redirect::write_stderr(&format!("{command}: command not found\n"), &output_redirect.stderr)?;
     }
 }
