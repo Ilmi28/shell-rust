@@ -1,4 +1,4 @@
-use std::io::{self};
+use std::{io::{self}, path::Path};
 
 use crate::{CommandRegistry, utils::file};
 
@@ -42,10 +42,25 @@ pub fn get_autocomplete(command: &String, args: &Vec<String>, registry: &Command
     }
     else {
         let curr_arg = args.last().unwrap();
-        let files = file::get_filenames_in_curr_folder()?;
+        let path = Path::new(curr_arg);
+        let parent_dir_str = if curr_arg.ends_with("/") {
+            &curr_arg[..curr_arg.len()-1]
+        } else {
+            path.parent().unwrap().to_str().unwrap()
+        };
+        let files = if parent_dir_str.is_empty() {
+            file::get_filenames_in_dir(".")
+        } else {
+            file::get_filenames_in_dir(parent_dir_str)
+        }?;
         for file in files {
-            if file.starts_with(curr_arg) {
-                return Ok(vec![file.clone()])
+            let full_path = if parent_dir_str.is_empty() {
+                format!("{file}")
+            } else {
+                format!("{parent_dir_str}/{file}")
+            };
+            if full_path.starts_with(curr_arg) {
+                return Ok(vec![full_path])
             }
         }
     }
