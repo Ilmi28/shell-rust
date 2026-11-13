@@ -25,7 +25,8 @@ pub fn read_input(commands: &CommandRegistry) -> io::Result<String> {
             NEW_LINE | ENTER => { break; }
             TAB => {
                 let (command, args) = parser::parse_command(&input);
-                let mut autocomplete = autocomplete::get_autocomplete(&command, &args, commands)?;
+                let mut trailing_space = true;
+                let mut autocomplete = autocomplete::get_autocomplete(&command, &args, commands, &mut trailing_space)?;
                 autocomplete.sort();
                 autocomplete.dedup();
                 if autocomplete.is_empty() {
@@ -34,7 +35,7 @@ pub fn read_input(commands: &CommandRegistry) -> io::Result<String> {
                     continue;
                 } 
                 else if autocomplete.len() == 1 {
-                    handle_single_autocomplete(&command, &args, &mut input, autocomplete);
+                    handle_single_autocomplete(&command, &args, &mut input, autocomplete, &trailing_space);
                 } else {
                     handle_multiple_autocomplete(prev, &mut chr[0], autocomplete, &mut input)?;
                 }
@@ -61,24 +62,28 @@ pub fn read_input(commands: &CommandRegistry) -> io::Result<String> {
     return Ok(input);
 }
 
-fn handle_single_autocomplete(command: &String, args: &Vec<String>, input: &mut String, autocomplete: Vec<String>) {
+fn handle_single_autocomplete(command: &String, args: &Vec<String>, input: &mut String, autocomplete: Vec<String>, trailing_space: &bool) {
     clear_line();
     let suggestion = autocomplete.first().unwrap();
 
     if args.is_empty() {
-        *input = String::from(format!("{suggestion} "));
-        print!("{PROMPT}{suggestion} ");
+        *input = String::from(format!("{suggestion}"));
+        print!("{PROMPT}{suggestion}");
     }
     else {
         let prev_args = &args[..args.len() - 1];
         if prev_args.is_empty() {
-            *input = String::from(format!("{command} {suggestion} "));
+            *input = String::from(format!("{command} {suggestion}"));
         }
         else {
             let prev_args = prev_args.join(" ");
-            *input = String::from(format!("{command} {prev_args} {suggestion} "));
+            *input = String::from(format!("{command} {prev_args} {suggestion}"));
         }
         print!("{PROMPT}{input}")
+    }
+    if *trailing_space {
+        input.push(' ');
+        print!(" ");
     }
 }
 

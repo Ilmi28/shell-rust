@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::path::PathBuf;
 use std::{env, path::Path};
 use std::process::Command;
 use std::{fs, io};
@@ -85,23 +86,20 @@ pub fn create_file_if_not_exists(path: &str) -> io::Result<File> {
     return Ok(file)
 }
 
-pub fn get_filenames_in_dir(dir: &str) -> io::Result<Vec<String>> {
+pub fn get_items_in_dir(dir: &str) -> io::Result<Vec<PathBuf>> {
     let command_paths_result = fs::read_dir(dir);
     match command_paths_result {
         Ok(command_paths) => {
-        let mut filenames: Vec<String> = Vec::new();
+        let mut entries: Vec<PathBuf> = Vec::new();
         for command_path_result in command_paths {
             let command_path = match command_path_result {
                 Ok(entry) => entry,
                 Err(_) => continue
             };
             let path = command_path.path();
-            let file_name = path.file_name().unwrap().to_str().unwrap();
-            if path.is_file() {
-                filenames.push(file_name.trim().to_string());
-            }
+            entries.push(path);
         }
-        Ok(filenames)
+        Ok(entries)
         },
 
         Err(_) => Ok(Vec::new())

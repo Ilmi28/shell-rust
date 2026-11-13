@@ -24,7 +24,7 @@ pub fn extract_common_prefix(arr: &Vec<String>) -> io::Result<String> {
     Ok(prefix)
 }
 
-pub fn get_autocomplete(command: &String, args: &Vec<String>, registry: &CommandRegistry) -> io::Result<Vec<String>> {
+pub fn get_autocomplete(command: &String, args: &Vec<String>, registry: &CommandRegistry, trailing_space: &mut bool) -> io::Result<Vec<String>> {
     if command.is_empty() {
         return Ok(Vec::new());
     }
@@ -45,20 +45,27 @@ pub fn get_autocomplete(command: &String, args: &Vec<String>, registry: &Command
         let path = Path::new(curr_arg);
         let parent_dir_str = if curr_arg.ends_with("/") {
             &curr_arg[..curr_arg.len()-1]
+        } else if curr_arg.is_empty() {
+            ""
         } else {
             path.parent().unwrap().to_str().unwrap()
         };
-        let files = if parent_dir_str.is_empty() {
-            file::get_filenames_in_dir(".")
+        let items = if parent_dir_str.is_empty() {
+            file::get_items_in_dir(".")
         } else {
-            file::get_filenames_in_dir(parent_dir_str)
+            file::get_items_in_dir(parent_dir_str)
         }?;
-        for file in files {
-            let full_path = if parent_dir_str.is_empty() {
-                format!("{file}")
+        for item in items { 
+            let item_name = item.file_name().unwrap().to_str().unwrap();
+            let mut full_path = if parent_dir_str.is_empty() {
+                format!("{item_name}")
             } else {
-                format!("{parent_dir_str}/{file}")
+                format!("{parent_dir_str}/{item_name}")
             };
+            if item.is_dir() {
+                *trailing_space = false;
+                full_path.push('/');
+            }
             if full_path.starts_with(curr_arg) {
                 return Ok(vec![full_path])
             }

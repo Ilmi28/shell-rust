@@ -44,10 +44,10 @@ pub fn parse_command(input: &str) -> (String, Vec<String>) {
         }
         current_arg.push(chr);
     }
-    if !current_arg.is_empty() {
-        parsed_parts.push(String::from_utf8(current_arg).unwrap());
+    parsed_parts.push(String::from_utf8(current_arg).unwrap());
+    if parsed_parts.is_empty() {
+        return (String::new(), Vec::new());
     }
-
     let command = parsed_parts.remove(0);
     return (command, parsed_parts);
 }
