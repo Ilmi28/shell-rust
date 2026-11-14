@@ -1,4 +1,4 @@
-use std::{io::{self}, path::Path};
+use std::io::{self};
 
 use crate::{CommandRegistry, utils::file};
 
@@ -24,52 +24,47 @@ pub fn extract_common_prefix(arr: &Vec<String>) -> io::Result<String> {
     Ok(prefix)
 }
 
-pub fn get_autocomplete(command: &String, args: &Vec<String>, registry: &CommandRegistry, trailing_space: &mut bool) -> io::Result<Vec<String>> {
+pub fn get_command_autocomplete(command: &String, registry: &CommandRegistry) -> io::Result<Vec<String>> {
+    let mut result: Vec<String> = Vec::new();
+    let commands = registry.get_commands();
+    let mut commands_autocomplete: Vec<String> = commands
+                                            .iter()
+                                            .filter(|x| x.starts_with(command))
+                                            .map(|x| x.to_string()).collect();
+
+    let mut external_autocomplete = file::get_external_commands_autocomplete(command)?;
+    result.append(&mut external_autocomplete);
+    result.append(&mut commands_autocomplete);
+    Ok(result)
+}
+
+pub fn get_arg_autocomplete(arg: &String, space: &mut bool) -> io::Result<Vec<String>> {
+    let mut result: Vec<String> = Vec::new();
+    let mut files = file::get_files_autocomplete(arg, space)?;
+    result.append(&mut files);
+    Ok(result)
+}
+
+pub fn get_autocomplete(command: &String, args: &Vec<String>, registry: &CommandRegistry, space: &mut bool) -> io::Result<Vec<String>> {
     if command.is_empty() {
         return Ok(Vec::new());
     }
-
+    let mut result: Vec<String> = Vec::new();
     if args.is_empty() {
         let commands = registry.get_commands();
-        let mut result: Vec<String> = commands
+        let mut commands_autocomplete: Vec<String> = commands
                                             .iter()
                                             .filter(|x| x.starts_with(command))
                                             .map(|x| x.to_string()).collect();
 
         let mut external_autocomplete = file::get_external_commands_autocomplete(command)?;
         result.append(&mut external_autocomplete);
-        return Ok(result);
+        result.append(&mut commands_autocomplete);
     }
     else {
-        let curr_arg = args.last().unwrap();
-        let path = Path::new(curr_arg);
-        let parent_dir_str = if curr_arg.ends_with("/") {
-            &curr_arg[..curr_arg.len()-1]
-        } else if curr_arg.is_empty() {
-            ""
-        } else {
-            path.parent().unwrap().to_str().unwrap()
-        };
-        let items = if parent_dir_str.is_empty() {
-            file::get_items_in_dir(".")
-        } else {
-            file::get_items_in_dir(parent_dir_str)
-        }?;
-        for item in items { 
-            let item_name = item.file_name().unwrap().to_str().unwrap();
-            let mut full_path = if parent_dir_str.is_empty() {
-                format!("{item_name}")
-            } else {
-                format!("{parent_dir_str}/{item_name}")
-            };
-            if item.is_dir() {
-                *trailing_space = false;
-                full_path.push('/');
-            }
-            if full_path.starts_with(curr_arg) {
-                return Ok(vec![full_path])
-            }
-        }
+        let arg = args.last().unwrap();
+        let mut files = file::get_files_autocomplete(arg, space)?;
+        result.append(&mut files);
     }
-    Ok(Vec::new())
+    Ok(result)
 }

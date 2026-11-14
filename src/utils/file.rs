@@ -1,5 +1,4 @@
 use std::fs::File;
-use std::path::PathBuf;
 use std::{env, path::Path};
 use std::process::Command;
 use std::{fs, io};
@@ -86,22 +85,51 @@ pub fn create_file_if_not_exists(path: &str) -> io::Result<File> {
     return Ok(file)
 }
 
-pub fn get_items_in_dir(dir: &str) -> io::Result<Vec<PathBuf>> {
+pub fn get_files_autocomplete(arg: &str, space: &mut bool) -> io::Result<Vec<String>> {
+    let path = Path::new(arg);
+    let parent_dir = if arg.ends_with("/") {
+        &arg[..arg.len()-1]
+    } else if arg.is_empty() {
+        ""
+    } else {
+        path.parent().unwrap().to_str().unwrap()
+    };
+
+    let dir = if parent_dir.is_empty() {
+        "."
+    } else {
+        parent_dir
+    };
     let command_paths_result = fs::read_dir(dir);
     match command_paths_result {
         Ok(command_paths) => {
-        let mut entries: Vec<PathBuf> = Vec::new();
-        for command_path_result in command_paths {
-            let command_path = match command_path_result {
-                Ok(entry) => entry,
-                Err(_) => continue
-            };
-            let path = command_path.path();
-            entries.push(path);
-        }
-        Ok(entries)
+            let mut entries: Vec<String> = Vec::new();
+            for command_path_result in command_paths {
+                let command_path = match command_path_result {
+                    Ok(entry) => entry,
+                    Err(_) => continue
+                };
+                let path = command_path.path();
+                let item_name = path.file_name().unwrap().to_str().unwrap();
+                let mut final_path = if parent_dir.is_empty() {
+                    format!("{item_name}")
+                } else {
+                    format!("{parent_dir}/{item_name}")
+                };
+                if !final_path.starts_with(arg) {
+                    continue;
+                }
+                if path.is_dir() {
+                    *space = false;
+                    final_path.push('/');
+                }
+                entries.push(final_path);
+            }
+            if entries.len() > 1 {
+                *space = false;
+            }
+            Ok(entries)
         },
-
         Err(_) => Ok(Vec::new())
     }
 }
