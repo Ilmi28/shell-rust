@@ -5,6 +5,7 @@ mod exit;
 mod echo;
 mod pwd;
 mod cd;
+mod complete;
 mod r#type;
 
 pub struct ShellContext<'a> {
@@ -28,6 +29,7 @@ impl CommandRegistry {
         commands.insert("type", Box::new(r#type::TypeCommand));
         commands.insert("pwd",Box::new(pwd::PwdCommand));  
         commands.insert("cd", Box::new(cd::CdCommand));
+        commands.insert("complete", Box::new(complete::CompleteCommand));
 
         Self { commands }
     }
