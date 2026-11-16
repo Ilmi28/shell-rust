@@ -113,6 +113,10 @@ fn arg_autocomplete(autocomplete: &Vec<String>, input: &mut String, trailing_spa
             io::stdout().flush()?;
         } else {
             print!("{}", BELL);
+            clear_line();
+            let prefix = autocomplete::extract_common_prefix(&autocomplete)?;
+            *input = format!("{prev_input} {prefix}");
+            print!("{PROMPT}{prev_input} {prefix}");
         }
     }
     Ok(())
