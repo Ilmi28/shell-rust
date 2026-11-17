@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io};
+use std::{cell::RefCell, collections::HashMap, io};
 
 use crate::utils::redirect::OutputRedirect;
 mod exit;
@@ -8,21 +8,19 @@ mod cd;
 mod complete;
 mod r#type;
 
-pub struct ShellContext<'a> {
-    pub is_builtin: &'a dyn Fn(&str) -> bool
-}
-
 pub trait Command {
-    fn execute(&self, args: &Vec<String>, ctx: &ShellContext, out: &OutputRedirect) -> io::Result<()>;
+    fn execute(&self, args: &Vec<String>, registry: &CommandRegistry, out: &OutputRedirect) -> io::Result<()>;
 }
 
 pub struct CommandRegistry {
-    pub commands: HashMap<&'static str, Box<dyn Command>>
+    commands: HashMap<&'static str, Box<dyn Command>>,
+    completions: RefCell<HashMap<String, String>>
 }
 
 impl CommandRegistry {
     pub fn new() -> Self {
         let mut commands: HashMap<&'static str, Box<dyn Command>> = HashMap::new();
+        let completions: RefCell<HashMap<String, String>> = RefCell::new(HashMap::new());
 
         commands.insert("exit", Box::new(exit::ExitCommand));
         commands.insert("echo", Box::new(echo::EchoCommand));
@@ -31,7 +29,19 @@ impl CommandRegistry {
         commands.insert("cd", Box::new(cd::CdCommand));
         commands.insert("complete", Box::new(complete::CompleteCommand));
 
-        Self { commands }
+        Self { commands, completions }
+    }
+
+    pub fn set_completion(&self, completion: &str, path: &str) {
+        self.completions.borrow_mut().insert(completion.to_string(), path.to_string());
+    }
+
+    pub fn get_completion_path(&self, completion: &str) -> Option<String> {
+        self.completions.borrow_mut().get(completion).cloned()
+    }
+
+    pub fn is_builtin(&self, name: &str) -> bool {
+        self.commands.contains_key(name)
     }
 
     pub fn get_commands(&self) -> Vec<String> {
@@ -44,10 +54,7 @@ impl CommandRegistry {
     pub fn run(&self, name: &str, args: &Vec<String>, out: &OutputRedirect) -> io::Result<bool> {
         match self.commands.get(name) {
             Some(cmd) => {
-                let ctx = ShellContext {
-                    is_builtin: &|target| self.commands.contains_key(target)
-                };
-                cmd.execute(args, &ctx, out)?;
+                cmd.execute(args, self, out)?;
                 return Ok(true);
             }
             None => {

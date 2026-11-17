@@ -24,7 +24,7 @@ pub fn extract_common_prefix(arr: &Vec<String>) -> io::Result<String> {
     Ok(prefix)
 }
 
-pub fn get_command_autocomplete(command: &String, registry: &CommandRegistry) -> io::Result<Vec<String>> {
+pub fn get_command_autocomplete(command: &str, registry: &CommandRegistry) -> io::Result<Vec<String>> {
     let mut result: Vec<String> = Vec::new();
     let commands = registry.get_commands();
     let mut commands_autocomplete: Vec<String> = commands
@@ -38,14 +38,14 @@ pub fn get_command_autocomplete(command: &String, registry: &CommandRegistry) ->
     Ok(result)
 }
 
-pub fn get_arg_autocomplete(arg: &String, space: &mut bool) -> io::Result<Vec<String>> {
+pub fn get_arg_autocomplete(arg: &str, space: &mut bool) -> io::Result<Vec<String>> {
     let mut result: Vec<String> = Vec::new();
     let mut files = file::get_files_autocomplete(arg, space)?;
     result.append(&mut files);
     Ok(result)
 }
 
-pub fn get_autocomplete(command: &String, args: &Vec<String>, registry: &CommandRegistry, space: &mut bool) -> io::Result<Vec<String>> {
+pub fn get_autocomplete(command: &str, args: &Vec<String>, registry: &CommandRegistry, space: &mut bool) -> io::Result<Vec<String>> {
     if command.is_empty() {
         return Ok(Vec::new());
     }

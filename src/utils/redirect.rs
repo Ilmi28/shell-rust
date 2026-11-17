@@ -2,13 +2,14 @@ use std::{fs::OpenOptions, io::{self, Write}};
 
 pub const PROMPT: &str = "$ ";
 
+#[derive(Default)]
 pub struct OutputRedirect {
     pub stdout: Option<(String, bool)>,
     pub stderr: Option<(String, bool)>
 }
 
-pub fn write_stdout(message: &str, target: &Option<(String, bool)>) -> io::Result<()> {
-    match target {
+pub fn write_stdout(message: &str, target: &OutputRedirect) -> io::Result<()> {
+    match &target.stdout {
         Some(target) => {
             write_file(message, target)?;
         },
@@ -20,8 +21,8 @@ pub fn write_stdout(message: &str, target: &Option<(String, bool)>) -> io::Resul
     Ok(())
 }
 
-pub fn write_stderr(message: &str, target: &Option<(String, bool)>) -> io::Result<()> {
-    match target {
+pub fn write_stderr(message: &str, target: &OutputRedirect) -> io::Result<()> {
+    match &target.stderr {
         Some(target) => {
             write_file(message, target)?;
         },

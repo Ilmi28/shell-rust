@@ -92,7 +92,7 @@ fn command_autocomplete(autocomplete: &Vec<String>, input: &mut String, prev_key
     Ok(())
 }
 
-fn arg_autocomplete(autocomplete: &Vec<String>, input: &mut String, trailing_space: &bool, prev_key: &u8, curr_key: &mut u8, prev_input: &String) -> io::Result<()> {
+fn arg_autocomplete(autocomplete: &Vec<String>, input: &mut String, trailing_space: &bool, prev_key: &u8, curr_key: &mut u8, prev_input: &str) -> io::Result<()> {
     if autocomplete.is_empty() {
         print!("{}", BELL);
     } else if autocomplete.len() == 1 {
@@ -123,7 +123,7 @@ fn arg_autocomplete(autocomplete: &Vec<String>, input: &mut String, trailing_spa
 }
 
 
-fn build_prev_input(command: &String, args: &Vec<String>) -> String {
+fn build_prev_input(command: &str, args: &Vec<String>) -> String {
     if args.is_empty() {
         return String::new();
     }

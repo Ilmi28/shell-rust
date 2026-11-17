@@ -60,15 +60,15 @@ pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &Outp
     match result {
         Ok(output) => {
             if !output.stdout.is_empty() {
-                redirect::write_stdout(&String::from_utf8_lossy(&output.stdout), &output_redirect.stdout)?
+                redirect::write_stdout(&String::from_utf8_lossy(&output.stdout), output_redirect)?
             }
 
             if !output.stderr.is_empty() {
-                redirect::write_stderr(&String::from_utf8_lossy(&output.stderr), &output_redirect.stderr)?
+                redirect::write_stderr(&String::from_utf8_lossy(&output.stderr), output_redirect)?
             }
         }
         Err(_) => {
-            redirect::write_stderr(&format!("{}: command not found\n", command), &None)?;
+            redirect::write_stderr(&format!("{}: command not found\n", command), output_redirect)?;
         }
     }
     Ok(())
