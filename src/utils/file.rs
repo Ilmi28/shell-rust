@@ -74,6 +74,19 @@ pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &Outp
     Ok(())
 }
 
+pub fn execute_completer_script(path: &str) -> String {
+    let mut cmd = Command::new(path);
+    let result = cmd.output();
+    match result {
+        Ok(output) => {
+            String::from_utf8_lossy(&output.stdout).to_string()
+        }
+        Err(_) => {
+            String::new()
+        }
+    }
+}
+
 pub fn create_file_if_not_exists(path: &str) -> io::Result<File> {
     let path = Path::new(path);
     if Path::exists(path) {

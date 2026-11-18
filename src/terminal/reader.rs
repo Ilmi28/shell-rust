@@ -1,6 +1,6 @@
 use std::io::{self, Read, Write};
 
-use crate::{CommandRegistry, terminal::autocomplete, utils::parser};
+use crate::{CommandRegistry, terminal::autocomplete, utils::{file, parser}};
 
 const NEW_LINE:     u8 = b'\n';
 const ENTER:        u8 = b'\r';
@@ -38,8 +38,14 @@ pub fn read_input(registry: &CommandRegistry) -> io::Result<String> {
                 if args.is_empty() {
                     command_autocomplete(&autocomplete, &mut input, &prev_key, &mut chr[0])?;
                 } else {
+                    let last_arg = args.last().unwrap();
+                    let completer_path = registry.get_completion_path(&command);
                     let prev_input = build_prev_input(&command, &args);
-                    arg_autocomplete(&autocomplete, &mut input, &trailing_space, &prev_key, &mut chr[0], &prev_input)?;
+                    if let Some(completer_path) = completer_path && last_arg.is_empty() {
+                        handle_completer(&mut input, &completer_path, &prev_input);
+                    } else {
+                        arg_autocomplete(&autocomplete, &mut input, &trailing_space, &prev_key, &mut chr[0], &prev_input)?;
+                    }
                 }
                 
                 io::stdout().flush()?;
@@ -63,6 +69,14 @@ pub fn read_input(registry: &CommandRegistry) -> io::Result<String> {
     }
     io::stdout().flush()?;
     return Ok(input);
+}
+
+fn handle_completer(input: &mut String, path: &str, prev_input: &str) {
+    clear_line();
+    let completer = file::execute_completer_script(path);
+    let completer = completer.trim();
+    *input = format!("{prev_input} {completer} ");
+    print!("{PROMPT}{prev_input} {completer} ")
 }
 
 fn command_autocomplete(autocomplete: &Vec<String>, input: &mut String, prev_key: &u8, curr_key: &mut u8) -> io::Result<()> {
