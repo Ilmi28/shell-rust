@@ -32,12 +32,12 @@ impl CommandRegistry {
         Self { commands, completions }
     }
 
-    pub fn set_completion(&self, completion: &str, path: &str) {
-        self.completions.borrow_mut().insert(completion.to_string(), path.to_string());
+    pub fn set_completion(&self, command: &str, path: &str) {
+        self.completions.borrow_mut().insert(command.to_string(), path.to_string());
     }
 
-    pub fn get_completion_path(&self, completion: &str) -> Option<String> {
-        self.completions.borrow_mut().get(completion).cloned()
+    pub fn get_completion_path(&self, command: &str) -> Option<String> {
+        self.completions.borrow_mut().get(command).cloned()
     }
 
     pub fn is_builtin(&self, name: &str) -> bool {

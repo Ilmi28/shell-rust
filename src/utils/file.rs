@@ -74,9 +74,9 @@ pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &Outp
     Ok(())
 }
 
-pub fn execute_completer_script(path: &str) -> String {
+pub fn execute_completer_script(path: &str, argv: &[&str; 3]) -> String {
     let mut cmd = Command::new(path);
-    let result = cmd.output();
+    let result = cmd.args(argv).output();
     match result {
         Ok(output) => {
             String::from_utf8_lossy(&output.stdout).to_string()

@@ -38,32 +38,24 @@ pub fn get_command_autocomplete(command: &str, registry: &CommandRegistry) -> io
     Ok(result)
 }
 
-pub fn get_arg_autocomplete(arg: &str, space: &mut bool) -> io::Result<Vec<String>> {
+pub fn get_arg_autocomplete(command: &str, args: &Vec<String>, space: &mut bool, registry: &CommandRegistry) -> io::Result<Vec<String>> {
+    let completion_path = registry.get_completion_path(command);
+    let last_arg = args.last().unwrap();
     let mut result: Vec<String> = Vec::new();
-    let mut files = file::get_files_autocomplete(arg, space)?;
-    result.append(&mut files);
-    Ok(result)
-}
-
-pub fn get_autocomplete(command: &str, args: &Vec<String>, registry: &CommandRegistry, space: &mut bool) -> io::Result<Vec<String>> {
-    if command.is_empty() {
-        return Ok(Vec::new());
-    }
-    let mut result: Vec<String> = Vec::new();
-    if args.is_empty() {
-        let commands = registry.get_commands();
-        let mut commands_autocomplete: Vec<String> = commands
-                                            .iter()
-                                            .filter(|x| x.starts_with(command))
-                                            .map(|x| x.to_string()).collect();
-
-        let mut external_autocomplete = file::get_external_commands_autocomplete(command)?;
-        result.append(&mut external_autocomplete);
-        result.append(&mut commands_autocomplete);
-    }
-    else {
-        let arg = args.last().unwrap();
-        let mut files = file::get_files_autocomplete(arg, space)?;
+    if let Some(path) = completion_path {
+        let mut argv: [&str; 3] = [""; 3];
+        argv[0] = command;
+        argv[1] = last_arg;
+        if args.len() > 1 {
+            argv[2] = &args[args.len() - 2];
+        } 
+        let completion = file::execute_completer_script(&path, &argv);
+        let completion = completion.trim().to_string();
+        if !completion.is_empty() {
+            result.push(completion);
+        }
+    } else {
+        let mut files = file::get_files_autocomplete(last_arg, space)?;
         result.append(&mut files);
     }
     Ok(result)
