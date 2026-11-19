@@ -46,13 +46,18 @@ pub fn get_arg_autocomplete(command: &str, args: &Vec<String>, space: &mut bool,
         let mut argv: [&str; 3] = [""; 3];
         argv[0] = command;
         argv[1] = last_arg;
+        
         if args.len() > 1 {
             argv[2] = &args[args.len() - 2];
-        } 
-        let completion = file::execute_completer_script(&path, &argv);
-        let completion = completion.trim().to_string();
-        if !completion.is_empty() {
-            result.push(completion);
+        } else {
+            argv[2] = command;
+        }
+        let completions = file::execute_completer_script(&path, &argv);
+        let completions: Vec<String> = completions.split('\n').map(String::from).collect();
+        for completion in completions {
+            if !completion.is_empty() {
+                result.push(completion);
+            }
         }
     } else {
         let mut files = file::get_files_autocomplete(last_arg, space)?;
