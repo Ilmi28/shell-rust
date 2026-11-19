@@ -37,7 +37,11 @@ impl CommandRegistry {
     }
 
     pub fn get_completion_path(&self, command: &str) -> Option<String> {
-        self.completions.borrow_mut().get(command).cloned()
+        self.completions.borrow().get(command).cloned()
+    }
+
+    pub fn is_completer(&self, command: &str) -> bool {
+        self.completions.borrow().contains_key(command)
     }
 
     pub fn is_builtin(&self, name: &str) -> bool {

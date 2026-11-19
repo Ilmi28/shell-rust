@@ -1,6 +1,6 @@
-use std::io::{self, Read, Write};
+use std::{env, io::{self, Read, Write}};
 
-use crate::{CommandRegistry, terminal::autocomplete, utils::parser};
+use crate::{CommandRegistry, consts, terminal::autocomplete, utils::parser};
 
 const NEW_LINE:     u8 = b'\n';
 const ENTER:        u8 = b'\r';
@@ -25,6 +25,12 @@ pub fn read_input(registry: &CommandRegistry) -> io::Result<String> {
             NEW_LINE | ENTER => { break; }
             TAB => {
                 let (command, args) = parser::parse_command(&input);
+                if registry.is_completer(&command) {
+                    unsafe {
+                        env::set_var(consts::COMP_LINE, &input);
+                        env::set_var(consts::COMP_POINT, input.len().to_string());
+                    }
+                }
 
                 let mut trailing_space = true;
                 let mut autocomplete = if args.is_empty() {
