@@ -25,6 +25,11 @@ impl Command for CompleteCommand {
                         registry.set_completion(completion, path);
                     }
                 },
+                "-r" => {
+                    if let Some(completion) = iter.next() {
+                        registry.remove_completion(completion);
+                    }
+                }
                 _other => {
 
                 }

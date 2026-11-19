@@ -40,6 +40,10 @@ impl CommandRegistry {
         self.completions.borrow().get(command).cloned()
     }
 
+    pub fn remove_completion(&self, command: &str) {
+        self.completions.borrow_mut().remove(command);
+    }
+
     pub fn is_completer(&self, command: &str) -> bool {
         self.completions.borrow().contains_key(command)
     }
