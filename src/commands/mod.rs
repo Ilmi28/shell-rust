@@ -7,6 +7,7 @@ mod pwd;
 mod cd;
 mod complete;
 mod r#type;
+mod jobs;
 
 pub trait Command {
     fn execute(&self, args: &Vec<String>, registry: &CommandRegistry, out: &OutputRedirect) -> io::Result<()>;
@@ -28,6 +29,7 @@ impl CommandRegistry {
         commands.insert("pwd",Box::new(pwd::PwdCommand));  
         commands.insert("cd", Box::new(cd::CdCommand));
         commands.insert("complete", Box::new(complete::CompleteCommand));
+        commands.insert("jobs", Box::new(jobs::JobsCommand));
 
         Self { commands, completions }
     }
