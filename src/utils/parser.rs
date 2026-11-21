@@ -112,6 +112,14 @@ fn extract_stderr_append(args: &mut Vec<String>) -> Option<String> {
     None
 }
 
+pub fn extract_background(args: &mut Vec<String>) -> bool {
+    if !args.is_empty() && let Some(background) = args.last() && background == "&" {
+        args.pop();
+        return true;
+    }
+    false
+}
+
 pub fn parse_output_redirect(args: &mut Vec<String>) -> io::Result<OutputRedirect> {
     let mut output_redirect = OutputRedirect {
         stdout: None,

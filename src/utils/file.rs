@@ -54,21 +54,30 @@ pub fn get_external_commands_autocomplete(input: &str) -> io::Result<Vec<String>
     Ok(commands)
 }
 
-pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect) -> io::Result<()> {
+pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect, background: bool) -> io::Result<()> {
     let mut ext_command = Command::new(command);
-    let result = ext_command.args(args).output();
-    match result {
-        Ok(output) => {
-            if !output.stdout.is_empty() {
-                redirect::write_stdout(&String::from_utf8_lossy(&output.stdout), output_redirect)?
-            }
+    let ext_command = ext_command.args(args);
 
-            if !output.stderr.is_empty() {
-                redirect::write_stderr(&String::from_utf8_lossy(&output.stderr), output_redirect)?
+    if background {
+        let child = ext_command.spawn()?;
+        let pid = child.id();
+        redirect::write_stdout(&format!("[1] {pid}\n"), output_redirect)?
+
+    } else {
+        let result = ext_command.output();
+        match result {
+            Ok(output) => {
+                if !output.stdout.is_empty() {
+                    redirect::write_stdout(&String::from_utf8_lossy(&output.stdout), output_redirect)?
+                }
+
+                if !output.stderr.is_empty() {
+                    redirect::write_stderr(&String::from_utf8_lossy(&output.stderr), output_redirect)?
+                }
             }
-        }
-        Err(_) => {
-            redirect::write_stderr(&format!("{}: command not found\n", command), output_redirect)?;
+            Err(_) => {
+                redirect::write_stderr(&format!("{}: command not found\n", command), output_redirect)?;
+            }
         }
     }
     Ok(())
