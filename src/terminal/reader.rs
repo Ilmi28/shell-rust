@@ -20,7 +20,7 @@ pub fn read_input(registry: &CommandRegistry) -> io::Result<String> {
     let mut prev_key: u8 = NUL;
     loop {
         let mut chr = [0u8; 1];
-        io::stdin().read(&mut chr)?;
+        io::stdin().read_exact(&mut chr)?;
         match chr[0] {
             NEW_LINE | ENTER => { break; }
             TAB => {
@@ -65,13 +65,13 @@ pub fn read_input(registry: &CommandRegistry) -> io::Result<String> {
         prev_key = chr[0];
     }
     if !input.is_empty() {
-        print!("\n");
+        println!();
     }
     io::stdout().flush()?;
-    return Ok(input);
+    Ok(input)
 }
 
-fn command_autocomplete(autocomplete: &Vec<String>, input: &mut String, prev_key: &u8, curr_key: &mut u8) -> io::Result<()> {
+fn command_autocomplete(autocomplete: &[String], input: &mut String, prev_key: &u8, curr_key: &mut u8) -> io::Result<()> {
     if autocomplete.is_empty() {
         print!("{}", BELL);
     } else if autocomplete.len() == 1 {
@@ -90,15 +90,15 @@ fn command_autocomplete(autocomplete: &Vec<String>, input: &mut String, prev_key
         } else {
             print!("{}", BELL);
             clear_line();
-            let prefix = autocomplete::extract_common_prefix(&autocomplete)?;
-            *input = format!("{prefix}");
+            let prefix = autocomplete::extract_common_prefix(autocomplete)?;
+            *input = prefix.to_string();
             print!("{PROMPT}{prefix}");
         }
     }
     Ok(())
 }
 
-fn arg_autocomplete(autocomplete: &Vec<String>, input: &mut String, trailing_space: &bool, prev_key: &u8, curr_key: &mut u8, prev_input: &str) -> io::Result<()> {
+fn arg_autocomplete(autocomplete: &[String], input: &mut String, trailing_space: &bool, prev_key: &u8, curr_key: &mut u8, prev_input: &str) -> io::Result<()> {
     if autocomplete.is_empty() {
         print!("{}", BELL);
     } else if autocomplete.len() == 1 {
@@ -120,7 +120,7 @@ fn arg_autocomplete(autocomplete: &Vec<String>, input: &mut String, trailing_spa
         } else {
             print!("{}", BELL);
             clear_line();
-            let prefix = autocomplete::extract_common_prefix(&autocomplete)?;
+            let prefix = autocomplete::extract_common_prefix(autocomplete)?;
             *input = format!("{prev_input} {prefix}");
             print!("{PROMPT}{prev_input} {prefix}");
         }
@@ -129,17 +129,17 @@ fn arg_autocomplete(autocomplete: &Vec<String>, input: &mut String, trailing_spa
 }
 
 
-fn build_prev_input(command: &str, args: &Vec<String>) -> String {
+fn build_prev_input(command: &str, args: &[String]) -> String {
     if args.is_empty() {
         return String::new();
     }
     let prev_args = &args[..args.len() - 1];
     if prev_args.is_empty() {
-        return String::from(format!("{command}"));
+        command.to_string()
     }
     else {
         let prev_args = prev_args.join(" ");
-        return String::from(format!("{command} {prev_args}"));
+        format!("{command} {prev_args}")
     }
 }
 

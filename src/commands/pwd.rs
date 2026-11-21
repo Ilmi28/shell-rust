@@ -7,7 +7,7 @@ use super::Command;
 pub struct PwdCommand;
 
 impl Command for PwdCommand {
-    fn execute(&self, _args: &Vec<String>, _registry: &CommandRegistry, output_redirect: &OutputRedirect) -> io::Result<()> {
+    fn execute(&self, _args: &[String], _registry: &CommandRegistry, output_redirect: &OutputRedirect) -> io::Result<()> {
         let current_dir = env::current_dir()?;
         let current_dir_str = current_dir.to_str().unwrap();
         redirect::write_stdout(&format!("{current_dir_str}\n"), output_redirect)?;

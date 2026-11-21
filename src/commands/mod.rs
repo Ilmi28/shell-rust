@@ -10,9 +10,10 @@ mod r#type;
 mod jobs;
 
 pub trait Command {
-    fn execute(&self, args: &Vec<String>, registry: &CommandRegistry, out: &OutputRedirect) -> io::Result<()>;
+    fn execute(&self, args: &[String], registry: &CommandRegistry, out: &OutputRedirect) -> io::Result<()>;
 }
 
+#[derive(Default)]
 pub struct CommandRegistry {
     commands: HashMap<&'static str, Box<dyn Command>>,
     completions: RefCell<HashMap<String, String>>
@@ -61,14 +62,14 @@ impl CommandRegistry {
             .collect()
     }
 
-    pub fn run(&self, name: &str, args: &Vec<String>, out: &OutputRedirect) -> io::Result<bool> {
+    pub fn run(&self, name: &str, args: &[String], out: &OutputRedirect) -> io::Result<bool> {
         match self.commands.get(name) {
             Some(cmd) => {
                 cmd.execute(args, self, out)?;
-                return Ok(true);
+                Ok(true)
             }
             None => {
-                return Ok(false);
+                Ok(false)
             }
         }
     }

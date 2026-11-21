@@ -21,7 +21,7 @@ fn main() -> io::Result<()> {
             continue;
         }
 
-        if let Some(_) = file::get_command_path(&command) {
+        if file::get_command_path(&command).is_some() {
             file::execute_command(&command, &args, &output_redirect)?;
             continue;
         }

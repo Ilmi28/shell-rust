@@ -7,14 +7,14 @@ use super::Command;
 pub struct TypeCommand;
 
 impl Command for TypeCommand {
-    fn execute(&self, args: &Vec<String>, registry: &CommandRegistry, output_redirect: &OutputRedirect) -> io::Result<()> {
+    fn execute(&self, args: &[String], registry: &CommandRegistry, output_redirect: &OutputRedirect) -> io::Result<()> {
         let cmd = &args[0];
-        if registry.is_builtin(&cmd) {
+        if registry.is_builtin(cmd) {
             redirect::write_stdout(&format!("{cmd} is a shell builtin\n"), output_redirect)?;
             return Ok(());
         }
 
-        if let Some(path) = file::get_command_path(&cmd) {
+        if let Some(path) = file::get_command_path(cmd) {
             redirect::write_stdout(&format!("{cmd} is {path}\n"), output_redirect)?;
             return Ok(());
         }

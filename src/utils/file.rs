@@ -16,7 +16,7 @@ pub fn is_executable(path: &str) -> bool {
     let permissions = metadata.permissions();
     let mode = permissions.mode();
 
-    return metadata.is_file() && mode & 0o111 != 0;
+    metadata.is_file() && mode & 0o111 != 0
 }
 
 pub fn get_command_path(command_name: &str) -> Option<String> {
@@ -46,7 +46,7 @@ pub fn get_external_commands_autocomplete(input: &str) -> io::Result<Vec<String>
             let path = command_path.path();
             let path_str = path.to_str().unwrap();
             let file_name = path.file_name().unwrap().to_str().unwrap();
-            if file_name.starts_with(input) && is_executable(&path_str) {
+            if file_name.starts_with(input) && is_executable(path_str) {
                 commands.push(file_name.trim().to_string());
             }
         }
@@ -95,13 +95,14 @@ pub fn create_file_if_not_exists(path: &str) -> io::Result<File> {
     }
     fs::create_dir_all(path.parent().unwrap())?;
     let file = File::create(path)?;
-    return Ok(file)
+    Ok(file)
 }
 
 pub fn get_files_autocomplete(arg: &str, space: &mut bool) -> io::Result<Vec<String>> {
     let path = Path::new(arg);
-    let parent_dir = if arg.ends_with("/") {
-        &arg[..arg.len()-1]
+    
+    let parent_dir = if let Some(stripped) = arg.strip_suffix("/") {
+        stripped
     } else if arg.is_empty() {
         ""
     } else {
@@ -125,7 +126,7 @@ pub fn get_files_autocomplete(arg: &str, space: &mut bool) -> io::Result<Vec<Str
                 let path = command_path.path();
                 let item_name = path.file_name().unwrap().to_str().unwrap();
                 let mut final_path = if parent_dir.is_empty() {
-                    format!("{item_name}")
+                    item_name.to_string()
                 } else {
                     format!("{parent_dir}/{item_name}")
                 };

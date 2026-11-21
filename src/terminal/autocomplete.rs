@@ -3,7 +3,7 @@ use std::io::{self};
 use crate::{CommandRegistry, utils::file};
 
 
-pub fn extract_common_prefix(arr: &Vec<String>) -> io::Result<String> {
+pub fn extract_common_prefix(arr: &[String]) -> io::Result<String> {
     if arr.is_empty() {
         return Ok(String::new());
     }
@@ -38,7 +38,7 @@ pub fn get_command_autocomplete(command: &str, registry: &CommandRegistry) -> io
     Ok(result)
 }
 
-pub fn get_arg_autocomplete(command: &str, args: &Vec<String>, space: &mut bool, registry: &CommandRegistry) -> io::Result<Vec<String>> {
+pub fn get_arg_autocomplete(command: &str, args: &[String], space: &mut bool, registry: &CommandRegistry) -> io::Result<Vec<String>> {
     let completion_path = registry.get_completion_path(command);
     let last_arg = args.last().unwrap();
     let mut result: Vec<String> = Vec::new();

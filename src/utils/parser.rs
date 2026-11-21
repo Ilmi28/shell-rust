@@ -3,7 +3,7 @@ use std::io;
 use crate::utils::{file, redirect::OutputRedirect, parser};
 
 
-const DOUBLE_QUOTE_ESCAPE_CHARS: [u8; 2] = [b'"', b'\\'];
+const DOUBLE_QUOTE_ESCAPE_CHARS: [u8; 2] = *b"\"\\";
 
 pub fn parse_command(input: &str) -> (String, Vec<String>) {
     let mut parsed_parts: Vec<String> = Vec::new();
@@ -49,7 +49,7 @@ pub fn parse_command(input: &str) -> (String, Vec<String>) {
         return (String::new(), Vec::new());
     }
     let command = parsed_parts.remove(0);
-    return (command, parsed_parts);
+    (command, parsed_parts)
 }
 
 fn extract_stdout(args: &mut Vec<String>) -> Option<String> {

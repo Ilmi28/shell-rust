@@ -5,7 +5,7 @@ use crate::{CommandRegistry, commands::Command, utils::redirect::{self, OutputRe
 pub struct CompleteCommand;
 
 impl Command for CompleteCommand {
-    fn execute(&self, args: &Vec<String>, registry: &CommandRegistry, out: &OutputRedirect) -> std::io::Result<()> {
+    fn execute(&self, args: &[String], registry: &CommandRegistry, out: &OutputRedirect) -> std::io::Result<()> {
         let mut iter = args.iter();
 
         while let Some(arg) = iter.next() {
