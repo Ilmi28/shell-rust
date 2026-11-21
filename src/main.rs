@@ -1,12 +1,13 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use codecrafters_shell::{CommandRegistry, terminal::{reader, termios}, utils::{file, parser, redirect::{self, OutputRedirect}}};
+use codecrafters_shell::{CommandRegistry, commands::ShellContext, completion::CompletionRegistry, terminal::{reader, termios}, utils::{file, parser, redirect::{self, OutputRedirect}}};
 
 fn main() -> io::Result<()> {
     let command_registry = CommandRegistry::new();
+    let mut completion_registry = CompletionRegistry::default();
     let _terminal = termios::RawTerminal::enable_raw_mode();
     loop {
-        let input = reader::read_input(&command_registry)?;
+        let input = reader::read_input(&completion_registry, &command_registry)?;
 
         if input.is_empty() {
             redirect::write_stdout("\n", &OutputRedirect::default())?;
@@ -17,7 +18,13 @@ fn main() -> io::Result<()> {
         let background = parser::extract_background(&mut args);
         let output_redirect = parser::parse_output_redirect(&mut args)?;
 
-        let result = command_registry.run(&command, &args, &output_redirect)?;
+        let mut ctx = ShellContext {
+            commands: &command_registry,
+            completions: &mut completion_registry,
+            out: &output_redirect
+        };
+
+        let result = command_registry.run(&command, &args, &mut ctx)?;
         if result {
             continue;
         }

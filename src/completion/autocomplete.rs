@@ -1,6 +1,6 @@
 use std::io::{self};
 
-use crate::{CommandRegistry, utils::file};
+use crate::{CommandRegistry, completion::CompletionRegistry, utils::file};
 
 
 pub fn extract_common_prefix(arr: &[String]) -> io::Result<String> {
@@ -24,9 +24,9 @@ pub fn extract_common_prefix(arr: &[String]) -> io::Result<String> {
     Ok(prefix)
 }
 
-pub fn get_command_autocomplete(command: &str, registry: &CommandRegistry) -> io::Result<Vec<String>> {
+pub fn get_command_autocomplete(command: &str, cmd_reg: &CommandRegistry) -> io::Result<Vec<String>> {
     let mut result: Vec<String> = Vec::new();
-    let commands = registry.get_commands();
+    let commands = cmd_reg.get_commands();
     let mut commands_autocomplete: Vec<String> = commands
                                             .iter()
                                             .filter(|x| x.starts_with(command))
@@ -38,8 +38,8 @@ pub fn get_command_autocomplete(command: &str, registry: &CommandRegistry) -> io
     Ok(result)
 }
 
-pub fn get_arg_autocomplete(command: &str, args: &[String], space: &mut bool, registry: &CommandRegistry) -> io::Result<Vec<String>> {
-    let completion_path = registry.get_completion_path(command);
+pub fn get_arg_autocomplete(command: &str, args: &[String], space: &mut bool, cmpl_reg: &CompletionRegistry) -> io::Result<Vec<String>> {
+    let completion_path = cmpl_reg.get_path(command);
     let last_arg = args.last().unwrap();
     let mut result: Vec<String> = Vec::new();
     if let Some(path) = completion_path {

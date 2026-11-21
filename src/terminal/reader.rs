@@ -1,6 +1,6 @@
 use std::{env, io::{self, Read, Write}};
 
-use crate::{CommandRegistry, consts, terminal::autocomplete, utils::parser};
+use crate::{CommandRegistry, completion::{CompletionRegistry, autocomplete}, consts, utils::parser};
 
 const NEW_LINE:     u8 = b'\n';
 const ENTER:        u8 = b'\r';
@@ -13,7 +13,7 @@ const BELL:         &str = "\x07";
 
 pub const PROMPT: &str = "$ ";
 
-pub fn read_input(registry: &CommandRegistry) -> io::Result<String> {
+pub fn read_input(cmpl_reg: &CompletionRegistry, cmd_reg: &CommandRegistry) -> io::Result<String> {
     print!("{PROMPT}");
     io::stdout().flush()?;
     let mut input = String::new();
@@ -25,7 +25,7 @@ pub fn read_input(registry: &CommandRegistry) -> io::Result<String> {
             NEW_LINE | ENTER => { break; }
             TAB => {
                 let (command, args) = parser::parse_command(&input);
-                if registry.is_completer(&command) {
+                if cmpl_reg.is_completer(&command) {
                     unsafe {
                         env::set_var(consts::COMP_LINE, &input);
                         env::set_var(consts::COMP_POINT, input.len().to_string());
@@ -34,9 +34,9 @@ pub fn read_input(registry: &CommandRegistry) -> io::Result<String> {
 
                 let mut trailing_space = true;
                 let mut autocomplete = if args.is_empty() {
-                    autocomplete::get_command_autocomplete(&command, registry)?
+                    autocomplete::get_command_autocomplete(&command, cmd_reg)?
                 } else {
-                    autocomplete::get_arg_autocomplete(&command, &args, &mut trailing_space, registry)?
+                    autocomplete::get_arg_autocomplete(&command, &args, &mut trailing_space, cmpl_reg)?
                 };
                 autocomplete.sort();
                 autocomplete.dedup();

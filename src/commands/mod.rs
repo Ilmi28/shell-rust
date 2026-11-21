@@ -1,6 +1,6 @@
-use std::{cell::RefCell, collections::HashMap, io};
+use std::{collections::HashMap, io};
 
-use crate::utils::redirect::OutputRedirect;
+use crate::{completion::CompletionRegistry, utils::redirect::OutputRedirect};
 mod exit;
 mod echo;
 mod pwd;
@@ -10,19 +10,23 @@ mod r#type;
 mod jobs;
 
 pub trait Command {
-    fn execute(&self, args: &[String], registry: &CommandRegistry, out: &OutputRedirect) -> io::Result<()>;
+    fn execute(&self, args: &[String], ctx: &mut ShellContext) -> io::Result<()>;
+}
+
+pub struct ShellContext<'a> {
+    pub commands: &'a CommandRegistry,
+    pub completions: &'a mut CompletionRegistry,
+    pub out: &'a OutputRedirect
 }
 
 #[derive(Default)]
 pub struct CommandRegistry {
-    commands: HashMap<&'static str, Box<dyn Command>>,
-    completions: RefCell<HashMap<String, String>>
+    commands: HashMap<&'static str, Box<dyn Command>>
 }
 
 impl CommandRegistry {
     pub fn new() -> Self {
         let mut commands: HashMap<&'static str, Box<dyn Command>> = HashMap::new();
-        let completions: RefCell<HashMap<String, String>> = RefCell::new(HashMap::new());
 
         commands.insert("exit", Box::new(exit::ExitCommand));
         commands.insert("echo", Box::new(echo::EchoCommand));
@@ -32,23 +36,7 @@ impl CommandRegistry {
         commands.insert("complete", Box::new(complete::CompleteCommand));
         commands.insert("jobs", Box::new(jobs::JobsCommand));
 
-        Self { commands, completions }
-    }
-
-    pub fn set_completion(&self, command: &str, path: &str) {
-        self.completions.borrow_mut().insert(command.to_string(), path.to_string());
-    }
-
-    pub fn get_completion_path(&self, command: &str) -> Option<String> {
-        self.completions.borrow().get(command).cloned()
-    }
-
-    pub fn remove_completion(&self, command: &str) {
-        self.completions.borrow_mut().remove(command);
-    }
-
-    pub fn is_completer(&self, command: &str) -> bool {
-        self.completions.borrow().contains_key(command)
+        Self { commands }
     }
 
     pub fn is_builtin(&self, name: &str) -> bool {
@@ -62,10 +50,10 @@ impl CommandRegistry {
             .collect()
     }
 
-    pub fn run(&self, name: &str, args: &[String], out: &OutputRedirect) -> io::Result<bool> {
+    pub fn run(&self, name: &str, args: &[String], ctx: &mut ShellContext) -> io::Result<bool> {
         match self.commands.get(name) {
             Some(cmd) => {
-                cmd.execute(args, self, out)?;
+                cmd.execute(args, ctx)?;
                 Ok(true)
             }
             None => {
