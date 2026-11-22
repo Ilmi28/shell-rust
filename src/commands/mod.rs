@@ -1,6 +1,6 @@
 use std::{collections::HashMap, io};
 
-use crate::{completion::CompletionRegistry, utils::redirect::OutputRedirect};
+use crate::{completion::CompletionRegistry, jobs::JobRegistry, utils::redirect::OutputRedirect};
 mod exit;
 mod echo;
 mod pwd;
@@ -16,6 +16,7 @@ pub trait Command {
 pub struct ShellContext<'a> {
     pub commands: &'a CommandRegistry,
     pub completions: &'a mut CompletionRegistry,
+    pub jobs: &'a mut JobRegistry,
     pub out: &'a OutputRedirect
 }
 

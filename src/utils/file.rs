@@ -4,6 +4,7 @@ use std::process::Command;
 use std::{fs, io};
 use std::os::unix::fs::PermissionsExt;
 
+use crate::jobs::{Job, JobRegistry, JobStatus};
 use crate::utils::redirect::OutputRedirect;
 use crate::consts;
 use crate::utils::{redirect, file};
@@ -54,14 +55,22 @@ pub fn get_external_commands_autocomplete(input: &str) -> io::Result<Vec<String>
     Ok(commands)
 }
 
-pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect, background: bool) -> io::Result<()> {
+pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect, job_reg: &mut JobRegistry, background: bool, orig_input: &str) -> io::Result<()> {
     let mut ext_command = Command::new(command);
     let ext_command = ext_command.args(args);
 
     if background {
         let child = ext_command.spawn()?;
+        let number = job_reg.get_next_number();
         let pid = child.id();
-        redirect::write_stdout(&format!("[1] {pid}\n"), output_redirect)?
+        let job = Job {
+            number,
+            cmd: orig_input.to_string(),
+            child,
+            status: JobStatus::Running,
+        };
+        job_reg.register(job);
+        redirect::write_stdout(&format!("[1] {pid}\n"), output_redirect)?;
 
     } else {
         let result = ext_command.output();
