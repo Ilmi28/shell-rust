@@ -1,5 +1,7 @@
 use std::{fmt::Display, process::Child};
 
+pub mod job_helper;
+
 #[derive(PartialEq)]
 pub enum JobStatus {
     Running = 1,
@@ -34,8 +36,8 @@ impl JobRegistry {
         self.jobs.push(job);
     }
 
-    pub fn get_all(&self) -> &Vec<Job> {
-        &self.jobs
+    pub fn get_all(&self) -> Vec<&Job> {
+        self.jobs.iter().collect()
     }
 
     pub fn update_statuses(&mut self) {
@@ -52,6 +54,13 @@ impl JobRegistry {
                 Err(_) => job.status = JobStatus::Failed
             }
         }
+    }
+
+    pub fn get_done(&self) -> Vec<&Job> {
+        self.jobs
+            .iter()
+            .filter(|j| j.status == JobStatus::Done)
+            .collect()
     }
 
     pub fn clear_jobs(&mut self) {

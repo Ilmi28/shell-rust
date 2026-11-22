@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use codecrafters_shell::{CommandRegistry, commands::ShellContext, completion::CompletionRegistry, jobs::JobRegistry, terminal::{reader, termios}, utils::{file, parser, redirect::{self, OutputRedirect}}};
+use codecrafters_shell::{CommandRegistry, commands::ShellContext, completion::CompletionRegistry, jobs::{JobRegistry, job_helper}, terminal::{reader, termios}, utils::{file, parser, redirect::{self, OutputRedirect}}};
 
 fn main() -> io::Result<()> {
     let command_registry = CommandRegistry::new();
@@ -8,6 +8,7 @@ fn main() -> io::Result<()> {
     let mut job_registry = JobRegistry::default();
     let _terminal = termios::RawTerminal::enable_raw_mode();
     loop {
+        job_helper::write_done_jobs(&mut job_registry)?;
         let input = reader::read_input(&completion_registry, &command_registry)?;
 
         if input.is_empty() {
