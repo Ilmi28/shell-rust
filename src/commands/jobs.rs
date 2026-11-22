@@ -6,11 +6,11 @@ impl Command for JobsCommand {
     fn execute(&self, _args: &[String], ctx: &mut ShellContext) -> std::io::Result<()> {
         ctx.jobs.update_statuses();
         let jobs = ctx.jobs.get_all();
-        let last_num = ctx.jobs.get_next_number() - 1;
-        for job in jobs {
-            let special_chr = if job.number == last_num {
+        let n = jobs.len() - 1;
+        for (index, job) in jobs.iter().enumerate() {
+            let special_chr = if index == n {
                 "+"
-            } else if job.number == last_num - 1 {
+            } else if index == n - 1 {
                 "-"
             } else {
                 " "
