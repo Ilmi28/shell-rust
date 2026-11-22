@@ -8,12 +8,14 @@ impl Command for JobsCommand {
         let jobs = ctx.jobs.get_all();
         let last_num = ctx.jobs.get_next_number() - 1;
         for job in jobs {
-            let plus_chr = if last_num == job.number {
+            let special_chr = if job.number == last_num {
                 "+"
+            } else if job.number == last_num - 1 {
+                "-"
             } else {
-                ""
+                " "
             };
-            redirect::write_stdout(&format!("[{}]{}  {:<24}{}\n", job.number, plus_chr, job.status, job.cmd), ctx.out)?;
+            redirect::write_stdout(&format!("[{}]{}  {:<24}{}\n", job.number, special_chr, job.status, job.cmd), ctx.out)?;
         }
         Ok(())
     }

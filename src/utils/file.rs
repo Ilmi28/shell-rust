@@ -70,7 +70,7 @@ pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &Outp
             status: JobStatus::Running,
         };
         job_reg.register(job);
-        redirect::write_stdout(&format!("[1] {pid}\n"), output_redirect)?;
+        redirect::write_stdout(&format!("[{number}] {pid}\n"), output_redirect)?;
 
     } else {
         let result = ext_command.output();
