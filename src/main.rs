@@ -32,7 +32,7 @@ fn main() -> io::Result<()> {
         }
 
         if file::get_command_path(&command).is_some() {
-            file::execute_command(&command, &args, &output_redirect,&mut job_registry, background, &input)?;
+            file::execute_command(&command, &args, &output_redirect,&mut job_registry, background)?;
             continue;
         }
 

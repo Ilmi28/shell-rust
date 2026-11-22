@@ -1,4 +1,4 @@
-use crate::{commands::{Command, ShellContext}, utils::redirect};
+use crate::{commands::{Command, ShellContext}, jobs::JobStatus, utils::redirect};
 
 pub struct JobsCommand;
 
@@ -15,8 +15,14 @@ impl Command for JobsCommand {
             } else {
                 " "
             };
-            redirect::write_stdout(&format!("[{}]{}  {:<24}{}\n", job.number, special_chr, job.status, job.cmd), ctx.out)?;
+            let background_chr = if job.status == JobStatus::Running {
+                "&"
+            } else {
+                ""
+            };
+            redirect::write_stdout(&format!("[{}]{special_chr}  {:<24}{} {background_chr}\n", job.number, job.status, job.cmd), ctx.out)?;
         }
+        ctx.jobs.clear_jobs();
         Ok(())
     }
 }

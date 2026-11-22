@@ -55,7 +55,7 @@ pub fn get_external_commands_autocomplete(input: &str) -> io::Result<Vec<String>
     Ok(commands)
 }
 
-pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect, job_reg: &mut JobRegistry, background: bool, orig_input: &str) -> io::Result<()> {
+pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect, job_reg: &mut JobRegistry, background: bool) -> io::Result<()> {
     let mut ext_command = Command::new(command);
     let ext_command = ext_command.args(args);
 
@@ -63,9 +63,10 @@ pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &Outp
         let child = ext_command.spawn()?;
         let number = job_reg.get_next_number();
         let pid = child.id();
+        let full_cmd = format!("{command} {}", args.join(" "));
         let job = Job {
             number,
-            cmd: orig_input.to_string(),
+            cmd: full_cmd,
             child,
             status: JobStatus::Running,
         };

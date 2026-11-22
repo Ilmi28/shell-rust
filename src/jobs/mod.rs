@@ -1,8 +1,9 @@
 use std::{fmt::Display, process::Child};
 
+#[derive(PartialEq)]
 pub enum JobStatus {
     Running = 1,
-    Completed = 2,
+    Done = 2,
     Failed = 3
 }
 
@@ -10,7 +11,7 @@ impl Display for JobStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             JobStatus::Running => f.pad("Running"),
-            JobStatus::Completed => f.pad("Completed"),
+            JobStatus::Done => f.pad("Done"),
             JobStatus::Failed => f.pad("Failed")
         }
     }
@@ -43,7 +44,7 @@ impl JobRegistry {
                 Ok(None) => job.status = JobStatus::Running,
                 Ok(Some(status)) => {
                     if status.success() {
-                        job.status = JobStatus::Completed
+                        job.status = JobStatus::Done
                     } else {
                         job.status = JobStatus::Failed
                     }
@@ -53,11 +54,12 @@ impl JobRegistry {
         }
     }
 
+    pub fn clear_jobs(&mut self) {
+        self.jobs.retain(|job| job.status == JobStatus::Running)
+    }
+
     pub fn get_next_number(&self) -> u32 {
-        let converted: u32 = match self.jobs.len().try_into() {
-            Ok(n) => n,
-            Err(_) => panic!("Value too large for u32.")
-        };
-        converted + 1
+        let max_num = self.jobs.iter().map(|i| i.number).max().unwrap_or(0);
+        max_num + 1
     }
 }
