@@ -55,39 +55,43 @@ pub fn get_external_commands_autocomplete(input: &str) -> io::Result<Vec<String>
     Ok(commands)
 }
 
-pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect, job_reg: &mut JobRegistry, background: bool) -> io::Result<()> {
+pub fn execute_command_background(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect, job_reg: &mut JobRegistry) -> io::Result<()> {
     let mut ext_command = Command::new(command);
     let ext_command = ext_command.args(args);
 
-    if background {
-        let child = ext_command.spawn()?;
-        let number = job_reg.get_next_number();
-        let pid = child.id();
-        let full_cmd = format!("{command} {}", args.join(" "));
-        let job = Job {
-            number,
-            cmd: full_cmd,
-            child,
-            status: JobStatus::Running,
-        };
-        job_reg.register(job);
-        redirect::write_stdout(&format!("[{number}] {pid}\n"), output_redirect)?;
+    let child = ext_command.spawn()?;
+    let number = job_reg.get_next_number();
+    let pid = child.id();
+    let full_cmd = format!("{command} {}", args.join(" "));
+    let job = Job {
+        number,
+        cmd: full_cmd,
+        child,
+        status: JobStatus::Running,
+    };
+    job_reg.register(job);
+    redirect::write_stdout(&format!("[{number}] {pid}\n"), output_redirect)?;
 
-    } else {
-        let result = ext_command.output();
-        match result {
-            Ok(output) => {
-                if !output.stdout.is_empty() {
-                    redirect::write_stdout(&String::from_utf8_lossy(&output.stdout), output_redirect)?
-                }
+    Ok(())
+}
 
-                if !output.stderr.is_empty() {
-                    redirect::write_stderr(&String::from_utf8_lossy(&output.stderr), output_redirect)?
-                }
+pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect) -> io::Result<()> {
+    let mut ext_command = Command::new(command);
+    let ext_command = ext_command.args(args);
+
+    let result = ext_command.output();
+    match result {
+        Ok(output) => {
+            if !output.stdout.is_empty() {
+                redirect::write_stdout(&String::from_utf8_lossy(&output.stdout), output_redirect)?
             }
-            Err(_) => {
-                redirect::write_stderr(&format!("{}: command not found\n", command), output_redirect)?;
+
+            if !output.stderr.is_empty() {
+                redirect::write_stderr(&String::from_utf8_lossy(&output.stderr), output_redirect)?
             }
+        }
+        Err(_) => {
+            redirect::write_stderr(&format!("{}: command not found\n", command), output_redirect)?;
         }
     }
     Ok(())

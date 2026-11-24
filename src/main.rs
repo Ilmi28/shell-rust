@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use codecrafters_shell::{CommandRegistry, commands::ShellContext, completion::CompletionRegistry, jobs::{JobRegistry, job_helper}, terminal::{reader, termios}, utils::{file, parser, redirect::{self, OutputRedirect}}};
+use codecrafters_shell::{CommandRegistry, commands::ShellContext, completion::CompletionRegistry, jobs::{JobRegistry, job_helper}, terminal::{pipeline, reader, termios}, utils::{file, parser, redirect::{self, OutputRedirect}}};
 
 fn main() -> io::Result<()> {
     let command_registry = CommandRegistry::new();
@@ -17,6 +17,11 @@ fn main() -> io::Result<()> {
         }
         
         let (command, mut args) = parser::parse_command(&input);
+        if args.iter().any(|arg| arg == "|") {
+            let commands = pipeline::extract_commands(&command, &args);
+            pipeline::run_pipeline(commands)?;
+            continue;
+        }
         let background = parser::extract_background(&mut args);
         let output_redirect = parser::parse_output_redirect(&mut args)?;
 
@@ -33,7 +38,11 @@ fn main() -> io::Result<()> {
         }
 
         if file::get_command_path(&command).is_some() {
-            file::execute_command(&command, &args, &output_redirect,&mut job_registry, background)?;
+            if background {
+                file::execute_command_background(&command, &args, &output_redirect,&mut job_registry)?;
+            } else {
+                file::execute_command(&command, &args, &output_redirect)?;
+            }
             continue;
         }
 
