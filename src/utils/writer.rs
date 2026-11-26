@@ -5,10 +5,17 @@ pub const PROMPT: &str = "$ ";
 #[derive(Default)]
 pub struct OutputRedirect {
     pub stdout: Option<(String, bool)>,
-    pub stderr: Option<(String, bool)>
+    pub stderr: Option<(String, bool)>,
+    pub pipein: Option<String>,
+    pub pipeout: Option<String>
 }
 
-pub fn write_stdout(message: &str, target: &OutputRedirect) -> io::Result<()> {
+pub fn write_stdout(message: &str, target: &mut OutputRedirect) -> io::Result<()> {
+    if let Some(buf) = &mut target.pipeout {
+        buf.push_str(message);
+        return Ok(())
+    }
+
     match &target.stdout {
         Some(target) => {
             write_file(message, target)?;

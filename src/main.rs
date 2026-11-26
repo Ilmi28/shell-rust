@@ -1,6 +1,5 @@
-#[allow(unused_imports)]
-use std::io::{self, Write};
-use codecrafters_shell::{CommandRegistry, commands::ShellContext, completion::CompletionRegistry, jobs::{JobRegistry, job_helper}, terminal::{pipeline, reader, termios}, utils::{file, parser, redirect::{self, OutputRedirect}}};
+use std::io::{self};
+use codecrafters_shell::{CommandRegistry, commands::ShellContext, completion::CompletionRegistry, jobs::{JobRegistry, job_helper}, terminal::{pipeline, reader, termios}, utils::{file, parser, writer::{self}}};
 
 fn main() -> io::Result<()> {
     let command_registry = CommandRegistry::new();
@@ -12,25 +11,26 @@ fn main() -> io::Result<()> {
         let input = reader::read_input(&completion_registry, &command_registry)?;
 
         if input.is_empty() {
-            redirect::write_stdout("\n", &OutputRedirect::default())?;
+            println!();
             continue;
         }
         
         let (command, mut args) = parser::parse_command(&input);
-        if args.iter().any(|arg| arg == "|") {
-            let commands = pipeline::extract_commands(&command, &args);
-            pipeline::run_pipeline(commands)?;
-            continue;
-        }
-        let background = parser::extract_background(&mut args);
-        let output_redirect = parser::parse_output_redirect(&mut args)?;
+        let mut output_redirect = parser::parse_output_redirect(&mut args)?;
 
         let mut ctx = ShellContext {
             commands: &command_registry,
             completions: &mut completion_registry,
             jobs: &mut job_registry,
-            out: &output_redirect
+            out: &mut output_redirect
         };
+
+        if args.iter().any(|arg| arg == "|") {
+            let commands = pipeline::extract_commands(&command, &args);
+            pipeline::run_pipeline(commands, &mut ctx)?;
+            continue;
+        }
+        let background = parser::extract_background(&mut args);
 
         let result = command_registry.run(&command, &args, &mut ctx)?;
         if result {
@@ -39,13 +39,13 @@ fn main() -> io::Result<()> {
 
         if file::get_command_path(&command).is_some() {
             if background {
-                file::execute_command_background(&command, &args, &output_redirect,&mut job_registry)?;
+                file::execute_command_background(&command, &args, &mut output_redirect, &mut job_registry)?;
             } else {
-                file::execute_command(&command, &args, &output_redirect)?;
+                file::execute_command(&command, &args, &mut output_redirect)?;
             }
             continue;
         }
 
-        redirect::write_stderr(&format!("{command}: command not found\n"), &output_redirect)?;
+        writer::write_stderr(&format!("{command}: command not found\n"), &output_redirect)?;
     }
 }

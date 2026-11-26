@@ -5,9 +5,9 @@ use std::{fs, io};
 use std::os::unix::fs::PermissionsExt;
 
 use crate::jobs::{Job, JobRegistry, JobStatus};
-use crate::utils::redirect::OutputRedirect;
+use crate::utils::writer::OutputRedirect;
 use crate::consts;
-use crate::utils::{redirect, file};
+use crate::utils::{writer, file};
 
 pub fn is_executable(path: &str) -> bool {
     let metadata = match fs::metadata(path) {
@@ -55,7 +55,7 @@ pub fn get_external_commands_autocomplete(input: &str) -> io::Result<Vec<String>
     Ok(commands)
 }
 
-pub fn execute_command_background(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect, job_reg: &mut JobRegistry) -> io::Result<()> {
+pub fn execute_command_background(command: &str, args: &Vec<String>, output_redirect: &mut OutputRedirect, job_reg: &mut JobRegistry) -> io::Result<()> {
     let mut ext_command = Command::new(command);
     let ext_command = ext_command.args(args);
 
@@ -70,12 +70,12 @@ pub fn execute_command_background(command: &str, args: &Vec<String>, output_redi
         status: JobStatus::Running,
     };
     job_reg.register(job);
-    redirect::write_stdout(&format!("[{number}] {pid}\n"), output_redirect)?;
+    writer::write_stdout(&format!("[{number}] {pid}\n"), output_redirect)?;
 
     Ok(())
 }
 
-pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &OutputRedirect) -> io::Result<()> {
+pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &mut OutputRedirect) -> io::Result<()> {
     let mut ext_command = Command::new(command);
     let ext_command = ext_command.args(args);
 
@@ -83,15 +83,15 @@ pub fn execute_command(command: &str, args: &Vec<String>, output_redirect: &Outp
     match result {
         Ok(output) => {
             if !output.stdout.is_empty() {
-                redirect::write_stdout(&String::from_utf8_lossy(&output.stdout), output_redirect)?
+                writer::write_stdout(&String::from_utf8_lossy(&output.stdout), output_redirect)?
             }
 
             if !output.stderr.is_empty() {
-                redirect::write_stderr(&String::from_utf8_lossy(&output.stderr), output_redirect)?
+                writer::write_stderr(&String::from_utf8_lossy(&output.stderr), output_redirect)?
             }
         }
         Err(_) => {
-            redirect::write_stderr(&format!("{}: command not found\n", command), output_redirect)?;
+            writer::write_stderr(&format!("{}: command not found\n", command), output_redirect)?;
         }
     }
     Ok(())

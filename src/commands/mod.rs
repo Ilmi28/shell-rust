@@ -1,6 +1,6 @@
 use std::{collections::HashMap, io};
 
-use crate::{completion::CompletionRegistry, jobs::JobRegistry, utils::redirect::OutputRedirect};
+use crate::{completion::CompletionRegistry, jobs::JobRegistry, utils::writer::OutputRedirect};
 mod exit;
 mod echo;
 mod pwd;
@@ -17,7 +17,7 @@ pub struct ShellContext<'a> {
     pub commands: &'a CommandRegistry,
     pub completions: &'a mut CompletionRegistry,
     pub jobs: &'a mut JobRegistry,
-    pub out: &'a OutputRedirect
+    pub out: &'a mut OutputRedirect
 }
 
 #[derive(Default)]
@@ -38,6 +38,10 @@ impl CommandRegistry {
         commands.insert("jobs", Box::new(jobs::JobsCommand));
 
         Self { commands }
+    }
+
+    pub fn get_command(&self, name: &str) -> Option<&dyn Command> {
+        self.commands.get(name).map(|cmd| cmd.as_ref())
     }
 
     pub fn is_builtin(&self, name: &str) -> bool {

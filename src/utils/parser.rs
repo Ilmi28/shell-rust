@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::utils::{file, redirect::OutputRedirect, parser};
+use crate::utils::{file, writer::OutputRedirect, parser};
 
 
 const DOUBLE_QUOTE_ESCAPE_CHARS: [u8; 2] = *b"\"\\";
@@ -123,7 +123,9 @@ pub fn extract_background(args: &mut Vec<String>) -> bool {
 pub fn parse_output_redirect(args: &mut Vec<String>) -> io::Result<OutputRedirect> {
     let mut output_redirect = OutputRedirect {
         stdout: None,
-        stderr: None
+        stderr: None,
+        pipein: None,
+        pipeout: None
     };
 
     let stdout = parser::extract_stdout(args);

@@ -1,4 +1,4 @@
-use crate::{commands::{Command, ShellContext}, utils::redirect::{self}};
+use crate::{commands::{Command, ShellContext}, utils::writer::{self}};
 
 
 
@@ -14,9 +14,9 @@ impl Command for CompleteCommand {
                     if let Some(completion) = iter.next() {
                         let completion_path = ctx.completions.get_path(completion);
                         if let Some(completion_path) = completion_path {
-                            redirect::write_stdout(&format!("complete -C '{completion_path}' {completion}\n"), ctx.out)?;
+                            writer::write_stdout(&format!("complete -C '{completion_path}' {completion}\n"), ctx.out)?;
                         } else {
-                            redirect::write_stderr(&format!("complete: {completion}: no completion specification\n"), ctx.out)?
+                            writer::write_stderr(&format!("complete: {completion}: no completion specification\n"), ctx.out)?
                         }
                     }
                 },
