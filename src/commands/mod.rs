@@ -8,6 +8,7 @@ mod cd;
 mod complete;
 mod r#type;
 mod jobs;
+mod history;
 
 pub trait Command {
     fn execute(&self, args: &[String], ctx: &mut ShellContext) -> io::Result<()>;
@@ -36,6 +37,7 @@ impl CommandRegistry {
         commands.insert("cd", Box::new(cd::CdCommand));
         commands.insert("complete", Box::new(complete::CompleteCommand));
         commands.insert("jobs", Box::new(jobs::JobsCommand));
+        commands.insert("history", Box::new(history::HistoryCommand));
 
         Self { commands }
     }
