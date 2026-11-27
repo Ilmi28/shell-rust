@@ -1,6 +1,6 @@
 use std::{collections::HashMap, io};
 
-use crate::{completion::CompletionRegistry, jobs::JobRegistry, utils::writer::OutputRedirect};
+use crate::{completion::CompletionRegistry, jobs::JobRegistry, terminal::history_reg::HistoryRegistry, utils::writer::OutputRedirect};
 mod exit;
 mod echo;
 mod pwd;
@@ -18,7 +18,8 @@ pub struct ShellContext<'a> {
     pub commands: &'a CommandRegistry,
     pub completions: &'a mut CompletionRegistry,
     pub jobs: &'a mut JobRegistry,
-    pub out: &'a mut OutputRedirect
+    pub out: &'a mut OutputRedirect,
+    pub history: &'a HistoryRegistry
 }
 
 #[derive(Default)]

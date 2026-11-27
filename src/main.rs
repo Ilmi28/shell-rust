@@ -1,10 +1,11 @@
 use std::io::{self};
-use codecrafters_shell::{CommandRegistry, commands::ShellContext, completion::CompletionRegistry, jobs::{JobRegistry, job_helper}, terminal::{pipeline, reader, termios}, utils::{file, parser, writer::{self}}};
+use codecrafters_shell::{CommandRegistry, commands::ShellContext, completion::CompletionRegistry, jobs::{JobRegistry, job_helper}, terminal::{history_reg::HistoryRegistry, pipeline, reader, termios}, utils::{file, parser, writer::{self}}};
 
 fn main() -> io::Result<()> {
     let command_registry = CommandRegistry::new();
     let mut completion_registry = CompletionRegistry::default();
     let mut job_registry = JobRegistry::default();
+    let mut history = HistoryRegistry::default();
     let _terminal = termios::RawTerminal::enable_raw_mode();
     loop {
         job_helper::write_done_jobs(&mut job_registry)?;
@@ -14,7 +15,9 @@ fn main() -> io::Result<()> {
             println!();
             continue;
         }
-        
+
+        history.add(&input);
+
         let (command, mut args) = parser::parse_command(&input);
         let mut output_redirect = parser::parse_output_redirect(&mut args)?;
 
@@ -22,6 +25,7 @@ fn main() -> io::Result<()> {
             commands: &command_registry,
             completions: &mut completion_registry,
             jobs: &mut job_registry,
+            history: &history,
             out: &mut output_redirect
         };
 
